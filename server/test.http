@@ -1,0 +1,38 @@
+### Register
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "jesus",
+  "email": "jesus@test.com",
+  "password": "123456"
+}
+
+### Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jesus@test.com",
+  "password": "123456"
+}
+
+### Get Favorites
+GET http://localhost:3000/api/favorites
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJqZXN1cyIsImlhdCI6MTc4MDg0MjMzMSwiZXhwIjoxNzgxNDQ3MTMxfQ.IvWBJRdkD1srgoHv0KNnq7od8nzAT4IZerCt944HOEM
+
+### Add Favorite
+POST http://localhost:3000/api/favorites
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJqZXN1cyIsImlhdCI6MTc4MDg0MjMzMSwiZXhwIjoxNzgxNDQ3MTMxfQ.IvWBJRdkD1srgoHv0KNnq7od8nzAT4IZerCt944HOEM
+
+{
+  "word": "hello",
+  "translation": "hola",
+  "language": "en"
+}
+
+### Delete Favorite
+DELETE http://localhost:3000/api/favorites/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJqZXN1cyIsImlhdCI6MTc4MDg0MjMzMSwiZXhwIjoxNzgxNDQ3MTMxfQ.IvWBJRdkD1srgoHv0KNnq7od8nzAT4IZerCt944HOEM
