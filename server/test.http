@@ -36,3 +36,23 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hb
 ### Delete Favorite
 DELETE http://localhost:3000/api/favorites/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJqZXN1cyIsImlhdCI6MTc4MDg0MjMzMSwiZXhwIjoxNzgxNDQ3MTMxfQ.IvWBJRdkD1srgoHv0KNnq7od8nzAT4IZerCt944HOEM
+
+### Register - empty fields
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "Jesus",
+  "email": "notanemail",
+  "password": "123"
+}
+
+### Register - username with spaces
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "jesus k",
+  "email": "jesus2@test.com",
+  "password": "123456"
+}
