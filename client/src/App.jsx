@@ -9,6 +9,7 @@ import Translator from "./pages/Translator";
 import Favorites from "./pages/Favorites";
 import "./index.css";
 import AuthCallback from "./pages/AuthCallback";
+import "./components/Layout.css";
 
 const ProtectedLayout = ({ children }) => {
   const { user, loading } = useAuth();
@@ -18,16 +19,7 @@ const ProtectedLayout = ({ children }) => {
   return (
     <div style={{ display: "flex" }}>
       <Sidebar />
-      <main
-        style={{
-          marginLeft: "240px",
-          padding: "32px",
-          flex: 1,
-          minHeight: "100vh",
-        }}
-      >
-        {children}
-      </main>
+      <main className="main-content">{children}</main>
     </div>
   );
 };

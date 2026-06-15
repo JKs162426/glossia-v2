@@ -131,3 +131,18 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .translation-panels {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sections {
+    grid-template-columns: 1fr;
+  }
+}

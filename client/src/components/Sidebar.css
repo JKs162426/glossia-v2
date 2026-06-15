@@ -106,3 +106,56 @@
   background-color: var(--bg-card);
   color: var(--error);
 }
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    height: 64px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    padding: 0;
+    z-index: 100;
+  }
+
+  .sidebar-logo,
+  .sidebar-user,
+  .logout-btn {
+    display: none;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    gap: 0;
+  }
+
+  .nav-item {
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 16px;
+    font-size: 10px;
+    border-left: none;
+    border-top: 3px solid transparent;
+    border-radius: 0;
+  }
+
+  .nav-item.active {
+    border-left: none;
+    border-top: 3px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    background: transparent;
+  }
+
+  .nav-icon {
+    font-size: 22px;
+  }
+}
