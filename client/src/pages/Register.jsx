@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import './Register.css';
 
 function Register() {
   const { register } = useAuth();
@@ -23,14 +24,23 @@ function Register() {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      {error && <p>{error}</p>}
-      <input name="username" placeholder="Username" onChange={handleChange} />
-      <input name="email" placeholder="Email" onChange={handleChange} />
-      <input name="password" type="password" placeholder="Password" onChange={handleChange} />
-      <button onClick={handleSubmit}>Register</button>
-      <p>Already have an account? <Link to="/login">Login</Link></p>
+    <div className="auth-container">
+      <div className="auth-box">
+        <div className="auth-logo">
+          <h1>Glossia</h1>
+          <p>Start your language journey</p>
+        </div>
+        {error && <p className="auth-error">{error}</p>}
+        <div className="auth-fields">
+          <input name="username" placeholder="Username" onChange={handleChange} />
+          <input name="email" placeholder="Email" onChange={handleChange} />
+          <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+        </div>
+        <button className="auth-btn" onClick={handleSubmit}>Register</button>
+        <p className="auth-link">
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,192 @@
+.flashcards {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .flashcards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .flashcards-header h1 {
+    font-size: 28px;
+  }
+  
+  .flashcards-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+  
+  .progress-bar {
+    height: 4px;
+    background-color: var(--border);
+    border-radius: 999px;
+    margin-bottom: 40px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+  
+  .card {
+    perspective: 1000px;
+    height: 280px;
+    cursor: pointer;
+    margin-bottom: 24px;
+  }
+  
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+  }
+  
+  .card.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+  
+  .card-front,
+  .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    border: 1px solid var(--border);
+  }
+  
+  .card-front {
+    background-color: var(--bg-card);
+  }
+  
+  .card-back {
+    background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(124,58,237,0.1));
+    border-color: var(--accent-cyan);
+    transform: rotateY(180deg);
+  }
+  
+  .card-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .card-front h2,
+  .card-back h2 {
+    font-size: 36px;
+    color: var(--text-primary);
+  }
+  
+  .lang-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    background-color: rgba(0, 212, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  
+  .card-actions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .wrong-btn,
+  .correct-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  
+  .wrong-btn {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--error);
+    color: var(--error);
+  }
+  
+  .wrong-btn:hover {
+    background-color: var(--error);
+    color: white;
+  }
+  
+  .correct-btn {
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+  }
+  
+  .correct-btn:hover {
+    background-color: var(--success);
+    color: white;
+  }
+  
+  .results-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .results-card h2 {
+    font-size: 24px;
+  }
+  
+  .score {
+    font-size: 48px;
+    font-family: 'Space Grotesk', sans-serif;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .score-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  
+  .score-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    border-radius: 999px;
+    transition: width 0.5s ease;
+  }
+  
+  .restart-btn {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    border-radius: 10px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+  }
+  
+  .restart-btn:hover {
+    opacity: 0.9;
+  }
+  
