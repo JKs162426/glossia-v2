@@ -1,12 +1,12 @@
-import { NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import './Sidebar.css';
+import { NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import "./Sidebar.css";
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: '🏠' },
-  { path: '/flashcards', label: 'Flashcards', icon: '🃏' },
-  { path: '/translator', label: 'Translator', icon: '🔤' },
-  { path: '/favorites', label: 'Favorites', icon: '⭐' },
+  { path: "/", label: "Dashboard", icon: "🏠" },
+  { path: "/flashcards", label: "Flashcards", icon: "🃏" },
+  { path: "/translator", label: "Translator", icon: "🔤" },
+  { path: "/favorites", label: "Favorites", icon: "⭐" },
 ];
 
 function Sidebar() {
@@ -29,9 +29,9 @@ function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
-            end={item.path === '/'}
+            end={item.path === "/"}
             className={({ isActive }) =>
-              isActive ? 'nav-item active' : 'nav-item'
+              isActive ? "nav-item active" : "nav-item"
             }
           >
             <span className="nav-icon">{item.icon}</span>

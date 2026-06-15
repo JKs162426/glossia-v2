@@ -1,11 +1,11 @@
-import { useAuth } from '../context/AuthContext';
-import './Home.css';
+import { useAuth } from "../context/AuthContext";
+import "./Home.css";
 
 const stats = [
-  { label: 'Words Learned', value: '0', icon: '📚' },
-  { label: 'Favorites', value: '0', icon: '⭐' },
-  { label: 'Flashcards Reviewed', value: '0', icon: '🃏' },
-  { label: 'Day Streak', value: '0', icon: '🔥' },
+  { label: "Words Learned", value: "0", icon: "📚" },
+  { label: "Favorites", value: "0", icon: "⭐" },
+  { label: "Flashcards Reviewed", value: "0", icon: "🃏" },
+  { label: "Day Streak", value: "0", icon: "🔥" },
 ];
 
 function Home() {

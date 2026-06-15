@@ -1,82 +1,83 @@
 .favorites {
-    max-width: 900px;
-  }
-  
-  .favorites-header {
-    margin-bottom: 32px;
-  }
-  
-  .favorites-header h1 {
-    font-size: 28px;
-    margin-bottom: 6px;
-  }
-  
-  .favorites-header p {
-    color: var(--text-secondary);
-    font-size: 15px;
-  }
-  
-  .favorites-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-  }
-  
-  .favorite-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-  }
-  
-  .favorite-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent-cyan);
-  }
-  
-  .lang-badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent-cyan);
-    background-color: rgba(0, 212, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 6px;
-    width: fit-content;
-  }
-  
-  .favorite-card h3 {
-    font-size: 18px;
-    color: var(--text-primary);
-  }
-  
-  .favorite-card p {
-    color: var(--text-secondary);
-    font-size: 14px;
-    flex: 1;
-  }
-  
-  .delete-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-secondary);
-    font-size: 13px;
-    padding: 6px 10px;
-    transition: all 0.2s ease;
-    width: fit-content;
-  }
-  
-  .delete-btn:hover {
-    border-color: var(--error);
-    color: var(--error);
-  }
-  
-  .empty-state {
-    color: var(--text-secondary);
-    font-size: 15px;
-  }
-  
+  max-width: 900px;
+}
+
+.favorites-header {
+  margin-bottom: 32px;
+}
+
+.favorites-header h1 {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.favorites-header p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.favorite-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.favorite-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-cyan);
+}
+
+.lang-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  background-color: rgba(0, 212, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.favorite-card h3 {
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.favorite-card p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  flex: 1;
+}
+
+.delete-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  padding: 6px 10px;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.delete-btn:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.empty-state {
+  color: var(--text-secondary);
+  font-size: 15px;
+}

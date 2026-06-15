@@ -1,109 +1,108 @@
 .sidebar {
-    width: 240px;
-    min-height: 100vh;
-    background-color: var(--bg-secondary);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 24px 16px;
-    position: fixed;
-    top: 0;
-    left: 0;
-  }
-  
-  .sidebar-logo {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 32px;
-    padding: 0 8px;
-  }
-  
-  .sidebar-logo h1 {
-    font-size: 24px;
-    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .sidebar-logo span {
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-  
-  .sidebar-user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 8px;
-    margin-bottom: 24px;
-    border-radius: 10px;
-    background-color: var(--bg-card);
-  }
-  
-  .avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-  
-  .sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-  }
-  
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-  }
-  
-  .nav-item:hover {
-    background-color: var(--bg-card);
-    color: var(--text-primary);
-  }
-  
-  .nav-item.active {
-    background-color: var(--bg-card);
-    color: var(--accent-cyan);
-    border-left: 3px solid var(--accent-cyan);
-  }
-  
-  .nav-icon {
-    font-size: 18px;
-  }
-  
-  .logout-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    width: 100%;
-  }
-  
-  .logout-btn:hover {
-    background-color: var(--bg-card);
-    color: var(--error);
-  }
-  
+  width: 240px;
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding: 0 8px;
+}
+
+.sidebar-logo h1 {
+  font-size: 24px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar-logo span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px;
+  margin-bottom: 24px;
+  border-radius: 10px;
+  background-color: var(--bg-card);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background-color: var(--bg-card);
+  color: var(--accent-cyan);
+  border-left: 3px solid var(--accent-cyan);
+}
+
+.nav-icon {
+  font-size: 18px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.logout-btn:hover {
+  background-color: var(--bg-card);
+  color: var(--error);
+}

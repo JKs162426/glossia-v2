@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import './Register.css';
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
+import "./Register.css";
 
 function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', email: '', password: '' });
-  const [error, setError] = useState('');
+  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -17,9 +17,9 @@ function Register() {
     e.preventDefault();
     try {
       await register(form.username, form.email, form.password);
-      navigate('/login');
+      navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      setError(err.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -32,11 +32,22 @@ function Register() {
         </div>
         {error && <p className="auth-error">{error}</p>}
         <div className="auth-fields">
-          <input name="username" placeholder="Username" onChange={handleChange} />
+          <input
+            name="username"
+            placeholder="Username"
+            onChange={handleChange}
+          />
           <input name="email" placeholder="Email" onChange={handleChange} />
-          <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            onChange={handleChange}
+          />
         </div>
-        <button className="auth-btn" onClick={handleSubmit}>Register</button>
+        <button className="auth-btn" onClick={handleSubmit}>
+          Register
+        </button>
         <p className="auth-link">
           Already have an account? <Link to="/login">Login</Link>
         </p>

@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import './Flashcards.css';
+import { useState } from "react";
+import "./Flashcards.css";
 
 const flashcardsData = [
-  { id: 1, word: 'Hello', translation: 'Hola', language: 'es' },
-  { id: 2, word: 'Goodbye', translation: 'Adiós', language: 'es' },
-  { id: 3, word: 'Thank you', translation: 'Gracias', language: 'es' },
-  { id: 4, word: 'Please', translation: 'Por favor', language: 'es' },
-  { id: 5, word: 'Sorry', translation: 'Lo siento', language: 'es' },
+  { id: 1, word: "Hello", translation: "Hola", language: "es" },
+  { id: 2, word: "Goodbye", translation: "Adiós", language: "es" },
+  { id: 3, word: "Thank you", translation: "Gracias", language: "es" },
+  { id: 4, word: "Please", translation: "Por favor", language: "es" },
+  { id: 5, word: "Sorry", translation: "Lo siento", language: "es" },
 ];
 
 function Flashcards() {
@@ -66,17 +66,19 @@ function Flashcards() {
     <div className="flashcards">
       <div className="flashcards-header">
         <h1>Flashcards 🃏</h1>
-        <p>{current + 1} of {flashcardsData.length}</p>
+        <p>
+          {current + 1} of {flashcardsData.length}
+        </p>
       </div>
 
       <div className="progress-bar">
         <div
           className="progress-fill"
-          style={{ width: `${((current) / flashcardsData.length) * 100}%` }}
+          style={{ width: `${(current / flashcardsData.length) * 100}%` }}
         />
       </div>
 
-      <div className={`card ${flipped ? 'flipped' : ''}`} onClick={handleFlip}>
+      <div className={`card ${flipped ? "flipped" : ""}`} onClick={handleFlip}>
         <div className="card-inner">
           <div className="card-front">
             <span className="card-hint">Tap to reveal</span>
