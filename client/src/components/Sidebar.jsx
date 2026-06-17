@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Sidebar.css";
+import LanguageSelector from "./LanguageSelector";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: "🏠" },
@@ -17,6 +18,10 @@ function Sidebar() {
       <div className="sidebar-logo">
         <h1>Glossia</h1>
         <span>v2</span>
+      </div>
+
+      <div className="sidebar-lang-desktop">
+        <LanguageSelector />
       </div>
 
       <div className="sidebar-user">
@@ -43,6 +48,9 @@ function Sidebar() {
       <button className="logout-btn" onClick={logout}>
         🚪 Logout
       </button>
+      <div className="sidebar-lang-mobile">
+        <LanguageSelector />
+      </div>
     </aside>
   );
 }

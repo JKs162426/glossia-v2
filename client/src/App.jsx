@@ -5,11 +5,13 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Flashcards from "./pages/Flashcards";
+import CategorySelect from "./pages/CategorySelect";
 import Translator from "./pages/Translator";
 import Favorites from "./pages/Favorites";
 import "./index.css";
 import AuthCallback from "./pages/AuthCallback";
 import "./components/Layout.css";
+import { LanguageProvider } from "./context/LanguageContext";
 
 const ProtectedLayout = ({ children }) => {
   const { user, loading } = useAuth();
@@ -42,6 +44,14 @@ function AppRoutes() {
         path="/flashcards"
         element={
           <ProtectedLayout>
+            <CategorySelect />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/flashcards/:id"
+        element={
+          <ProtectedLayout>
             <Flashcards />
           </ProtectedLayout>
         }
@@ -69,9 +79,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <LanguageProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

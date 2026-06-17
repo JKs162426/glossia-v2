@@ -107,6 +107,14 @@
   color: var(--error);
 }
 
+.sidebar-lang-desktop {
+  margin-bottom: 20px;
+}
+
+.sidebar-lang-mobile {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
@@ -157,5 +165,17 @@
 
   .nav-icon {
     font-size: 22px;
+  }
+
+  .sidebar-lang-desktop {
+    display: none;
+  }
+
+  .sidebar-lang-mobile {
+    display: block;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 101;
   }
 }

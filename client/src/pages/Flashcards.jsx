@@ -1,28 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import api from "../services/api";
+import { useLanguage } from "../context/LanguageContext";
 import "./Flashcards.css";
 
-const flashcardsData = [
-  { id: 1, word: "Hello", translation: "Hola", language: "es" },
-  { id: 2, word: "Goodbye", translation: "Adiós", language: "es" },
-  { id: 3, word: "Thank you", translation: "Gracias", language: "es" },
-  { id: 4, word: "Please", translation: "Por favor", language: "es" },
-  { id: 5, word: "Sorry", translation: "Lo siento", language: "es" },
-];
-
 function Flashcards() {
+  const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { targetLanguage } = useLanguage();
+
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [completed, setCompleted] = useState([]);
 
-  const card = flashcardsData[current];
+  const categoryName = location.state?.category?.name || "Flashcards";
+
+  useEffect(() => {
+    fetchWords();
+  }, [id, targetLanguage]);
+
+  const fetchWords = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(
+        `/categories/${id}/words?language=${targetLanguage}`
+      );
+      setCards(res.data);
+      setCurrent(0);
+      setCompleted([]);
+    } catch (error) {
+      console.error("Error fetching words");
+    }
+    setLoading(false);
+  };
 
   const handleFlip = () => setFlipped(!flipped);
 
   const handleNext = (correct) => {
-    setCompleted([...completed, { ...card, correct }]);
+    setCompleted([...completed, { ...cards[current], correct }]);
     setFlipped(false);
     setTimeout(() => {
-      if (current + 1 < flashcardsData.length) {
+      if (current + 1 < cards.length) {
         setCurrent(current + 1);
       } else {
         setCurrent(null);
@@ -36,45 +57,77 @@ function Flashcards() {
     setCompleted([]);
   };
 
+  if (loading) {
+    return (
+      <div className="flashcards">
+        <p className="empty-state">Loading words...</p>
+      </div>
+    );
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div className="flashcards">
+        <div className="flashcards-header">
+          <h1>{categoryName} 🃏</h1>
+        </div>
+        <p className="empty-state">No words available for this language yet.</p>
+        <button className="restart-btn" onClick={() => navigate("/flashcards")}>
+          Choose Another Category
+        </button>
+      </div>
+    );
+  }
+
   if (current === null) {
     const correct = completed.filter((c) => c.correct).length;
     return (
       <div className="flashcards">
         <div className="flashcards-header">
-          <h1>Flashcards 🃏</h1>
+          <h1>{categoryName} 🃏</h1>
         </div>
         <div className="results-card">
           <h2>Session Complete!</h2>
           <p className="score">
-            {correct} / {flashcardsData.length} correct
+            {correct} / {cards.length} correct
           </p>
           <div className="score-bar">
             <div
               className="score-fill"
-              style={{ width: `${(correct / flashcardsData.length) * 100}%` }}
+              style={{ width: `${(correct / cards.length) * 100}%` }}
             />
           </div>
-          <button className="restart-btn" onClick={handleRestart}>
-            Try Again
-          </button>
+          <div className="results-actions">
+            <button className="restart-btn" onClick={handleRestart}>
+              Try Again
+            </button>
+            <button
+              className="secondary-btn"
+              onClick={() => navigate("/flashcards")}
+            >
+              Choose Another Category
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  const card = cards[current];
+
   return (
     <div className="flashcards">
       <div className="flashcards-header">
-        <h1>Flashcards 🃏</h1>
+        <h1>{categoryName} 🃏</h1>
         <p>
-          {current + 1} of {flashcardsData.length}
+          {current + 1} of {cards.length}
         </p>
       </div>
 
       <div className="progress-bar">
         <div
           className="progress-fill"
-          style={{ width: `${(current / flashcardsData.length) * 100}%` }}
+          style={{ width: `${(current / cards.length) * 100}%` }}
         />
       </div>
 
