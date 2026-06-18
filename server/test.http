@@ -56,3 +56,25 @@ Content-Type: application/json
   "email": "jesus2@test.com",
   "password": "123456"
 }
+
+### Get my profile
+GET http://localhost:3000/api/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJqZXN1cyIsImlhdCI6MTc4MTczNTQxMCwiZXhwIjoxNzgyMzQwMjEwfQ._2lZ2szjvLL5Q3KR8yIIV-kUs6sXPpuqbBTbxrV6HVc
+
+
+### Update language
+PUT http://localhost:3000/api/users/language
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJqZXN1cyIsImlhdCI6MTc4MTczNTUxOCwiZXhwIjoxNzgyMzQwMzE4fQ.Ve_P1QWYwRDdw4GSbuYcTLMdpWft_8HXlfQzZ5Q79rc
+
+{
+  "language": "ru"
+}
+
+### Get categories
+GET http://localhost:3000/api/categories
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJqZXN1cyIsImlhdCI6MTc4MTczNjk4MCwiZXhwIjoxNzgyMzQxNzgwfQ.DKtK14Un1IRvIvDloKvaosQcOk5YFwWaqPuzS2lRXuo
+
+### Get words for category 1 in Spanish
+GET http://localhost:3000/api/categories/1/words?language=es
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJqZXN1cyIsImlhdCI6MTc4MTczNzA0MywiZXhwIjoxNzgyMzQxODQzfQ.TCjqTg1Pi1UB3DXcwoYvv5AZdiwSD64UpZC6h17V0ug
