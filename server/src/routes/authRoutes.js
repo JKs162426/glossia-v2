@@ -1,52 +1,56 @@
 import express from "express";
 import passport from "passport";
-import jwt from "jsonwebtoken";
-import { register, login } from "../controllers/authController.js";
+import config from "../config/env.js";
+import {
+  register,
+  login,
+  logout,
+  getMe,
+  googleCallback,
+} from "../controllers/authController.js";
 import {
   registerValidators,
   loginValidators,
-} from "../middleware/authValidators.js";
+} from "../middleware/validators.js";
 import { validate } from "../middleware/validate.js";
+import { loginLimiter, registerLimiter } from "../middleware/rateLimit.js";
+import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Email/password auth
-router.post("/register", registerValidators, validate, register);
-router.post("/login", loginValidators, validate, login);
+router.post(
+  "/register",
+  registerLimiter,
+  registerValidators,
+  validate,
+  register,
+);
+router.post("/login", loginLimiter, loginValidators, validate, login);
+router.post("/logout", logout);
+router.get("/me", authMiddleware, getMe);
 
 // Google OAuth
-router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+const googleFailure = `${config.clientUrl}/login?error=google`;
+
+router.get("/google", (req, res, next) => {
+  if (!config.googleEnabled) return res.redirect(googleFailure);
+  passport.authenticate("google", { scope: ["profile", "email"] })(
+    req,
+    res,
+    next,
+  );
+});
 
 router.get(
   "/google/callback",
+  (req, res, next) =>
+    config.googleEnabled ? next() : res.redirect(googleFailure),
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "http://localhost:5173/login",
-    failureMessage: true,
+    failureRedirect: googleFailure,
   }),
-  (req, res) => {
-    console.log("Google user:", req.user);
-    const token = jwt.sign(
-      { id: req.user.id, username: req.user.username },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    const user = encodeURIComponent(
-      JSON.stringify({
-        id: req.user.id,
-        username: req.user.username,
-        email: req.user.email,
-      })
-    );
-
-    res.redirect(
-      `http://localhost:5173/auth/callback?token=${token}&user=${user}`
-    );
-  }
+  googleCallback,
 );
 
 export default router;

@@ -1,14 +1,19 @@
-.main-content {
-  margin-left: 240px;
-  padding: 32px;
-  flex: 1;
+.app-shell {
+  display: flex;
   min-height: 100vh;
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 40px;
+  flex: 1;
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 16px;
-    padding-bottom: 80px;
+    padding: calc(var(--mobile-topbar-height) + 20px) 16px
+      calc(var(--mobile-nav-height) + 24px);
   }
 }

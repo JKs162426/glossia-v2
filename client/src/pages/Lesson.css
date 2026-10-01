@@ -1,0 +1,372 @@
+.lesson-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.lesson-error {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+/* ---- Top bar ---- */
+
+.lesson-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 8px;
+}
+
+.lesson-progress {
+  flex: 1;
+  height: 12px;
+}
+
+.lesson-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ---- Body ---- */
+
+.lesson-body {
+  flex: 1;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fade-in 0.25s ease;
+}
+
+.lesson-unit {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.retry-badge {
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.lesson-prompt {
+  font-size: 24px;
+}
+
+.prompt-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 20px 22px;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-soft), var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+.prompt-text {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.prompt-hint {
+  width: 100%;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.speak-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
+  background-color: var(--accent-cyan-soft);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  font-size: 20px;
+  transition: transform 0.1s ease;
+}
+
+.speak-btn:hover {
+  transform: scale(1.05);
+}
+
+.speak-btn.large {
+  width: 96px;
+  height: 96px;
+  font-size: 40px;
+  border-radius: var(--radius-xl);
+  margin: 0 auto;
+}
+
+/* ---- Options ---- */
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background-color: var(--bg-card);
+  border: 2px solid var(--border);
+  box-shadow: 0 3px 0 var(--border);
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background-color: var(--bg-elevated);
+}
+
+.option:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.option.selected {
+  border-color: var(--accent-cyan);
+  background-color: var(--accent-cyan-soft);
+  box-shadow: 0 3px 0 #00708a;
+}
+
+.option.correct {
+  border-color: var(--success);
+  background-color: var(--success-soft);
+  box-shadow: 0 3px 0 #08734f;
+}
+
+.option.wrong {
+  border-color: var(--error);
+  background-color: var(--error-soft);
+  box-shadow: 0 3px 0 #9b2c2c;
+  animation: shake 0.35s ease;
+}
+
+.option:disabled {
+  cursor: default;
+}
+
+.type-input {
+  font-size: 18px;
+  padding: 16px 18px;
+}
+
+/* ---- Match ---- */
+
+.match-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.match-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.match-item {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 56px;
+  justify-content: center;
+}
+
+.match-item small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.option.matched {
+  opacity: 0.35;
+  border-color: var(--success);
+}
+
+/* ---- Footer ---- */
+
+.lesson-footer {
+  position: fixed;
+  inset: auto 0 0 0;
+  border-top: 1px solid var(--border);
+  background-color: var(--bg-secondary);
+  transition: background-color 0.2s ease;
+}
+
+.lesson-footer.correct {
+  background-color: #0c2a22;
+  border-top-color: rgba(16, 185, 129, 0.4);
+}
+
+.lesson-footer.wrong {
+  background-color: #2c1215;
+  border-top-color: rgba(239, 68, 68, 0.4);
+}
+
+.lesson-footer-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 96px;
+}
+
+.feedback-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+
+.feedback-text strong {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.lesson-footer.correct .feedback-text strong {
+  color: var(--success);
+}
+
+.lesson-footer.wrong .feedback-text strong {
+  color: var(--error);
+}
+
+.footer-btn {
+  min-width: 160px;
+}
+
+/* ---- Results ---- */
+
+.lesson-results {
+  width: 100%;
+  max-width: 440px;
+  margin: auto;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+  animation: fade-in 0.3s ease;
+}
+
+.results-trophy {
+  font-size: 72px;
+  animation: pop 0.5s ease;
+}
+
+.results-stars {
+  font-size: 44px;
+  letter-spacing: 6px;
+  color: var(--border-strong);
+}
+
+.results-stars .on {
+  color: var(--gold);
+  display: inline-block;
+  animation: pop 0.4s ease both;
+}
+
+.results-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.results-stats .card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.results-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.results-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+@keyframes shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .options {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-prompt {
+    font-size: 20px;
+  }
+
+  .prompt-text {
+    font-size: 24px;
+  }
+
+  .lesson-footer-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .footer-btn {
+    width: 100%;
+  }
+}

@@ -1,53 +1,34 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { useCallback, useMemo } from "react";
 import api from "../services/api";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./auth-context";
+import { LanguageContext } from "./language-context";
+import { DEFAULT_LANGUAGE } from "../lib/languages";
 
-const LanguageContext = createContext();
+// The target language is part of the user profile, so it comes straight from
+// the auth context (no second request on load).
+export function LanguageProvider({ children }) {
+  const { user, setUser } = useAuth();
+  const targetLanguage = user?.target_language || DEFAULT_LANGUAGE;
 
-export const languages = [
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "es", label: "Spanish", flag: "🇪🇸" },
-  { code: "fr", label: "French", flag: "🇫🇷" },
-  { code: "de", label: "German", flag: "🇩🇪" },
-  { code: "it", label: "Italian", flag: "🇮🇹" },
-  { code: "pt", label: "Portuguese", flag: "🇧🇷" },
-  { code: "ru", label: "Russian", flag: "🇷🇺" },
-  { code: "zh", label: "Chinese", flag: "🇨🇳" },
-];
+  const changeLanguage = useCallback(
+    async (code) => {
+      const previous = targetLanguage;
+      setUser((u) => (u ? { ...u, target_language: code } : u));
+      try {
+        await api.put("/users/language", { language: code });
+      } catch {
+        setUser((u) => (u ? { ...u, target_language: previous } : u));
+      }
+    },
+    [targetLanguage, setUser],
+  );
 
-export const LanguageProvider = ({ children }) => {
-  const { user } = useAuth();
-  const [targetLanguage, setTargetLanguage] = useState("es");
-
-  useEffect(() => {
-    if (user) {
-      fetchLanguage();
-    }
-  }, [user]);
-
-  const fetchLanguage = async () => {
-    try {
-      const res = await api.get("/users/me");
-      setTargetLanguage(res.data.target_language || "es");
-    } catch (error) {
-      console.error("Error fetching language");
-    }
-  };
-
-  const changeLanguage = async (code) => {
-    try {
-      await api.put("/users/language", { language: code });
-      setTargetLanguage(code);
-    } catch (error) {
-      console.error("Error updating language");
-    }
-  };
+  const value = useMemo(
+    () => ({ targetLanguage, changeLanguage }),
+    [targetLanguage, changeLanguage],
+  );
 
   return (
-    <LanguageContext.Provider value={{ targetLanguage, changeLanguage }}>
-      {children}
-    </LanguageContext.Provider>
+    <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
   );
-};
-
-export const useLanguage = () => useContext(LanguageContext);
+}

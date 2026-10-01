@@ -1,23 +1,20 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/auth-context";
+import Loader from "../components/Loader";
 
+// Google sign-in lands here after the API has set the session cookie.
 function AuthCallback() {
+  const { refreshUser } = useAuth();
+  const navigate = useNavigate();
+
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const token = url.searchParams.get("token");
-    const user = url.searchParams.get("user");
+    refreshUser().then((user) =>
+      navigate(user ? "/" : "/login?error=google", { replace: true }),
+    );
+  }, [refreshUser, navigate]);
 
-    if (token && user) {
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", decodeURIComponent(user));
-      window.location.href = "/";
-    } else {
-      window.location.href = "/login";
-    }
-  }, []);
-
-  return <p>Signing you in...</p>;
+  return <Loader label="Signing you in…" fullscreen />;
 }
 
 export default AuthCallback;

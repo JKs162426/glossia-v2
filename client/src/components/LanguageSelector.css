@@ -5,23 +5,30 @@
 .lang-trigger {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  width: 100%;
   padding: 10px 14px;
   background-color: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text-primary);
-  font-size: 13px;
+  border-radius: var(--radius);
+  font-size: 14px;
   font-weight: 500;
   transition: border-color 0.2s ease;
 }
 
-.lang-trigger:hover {
+.lang-trigger:hover,
+.lang-trigger[aria-expanded="true"] {
   border-color: var(--accent-cyan);
 }
 
+.lang-flag {
+  font-size: 18px;
+  line-height: 1;
+}
+
 .lang-trigger-label {
-  display: block;
+  flex: 1;
+  text-align: left;
 }
 
 .lang-arrow {
@@ -29,43 +36,38 @@
   color: var(--text-secondary);
 }
 
-.lang-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 99;
-}
-
 .lang-dropdown {
+  list-style: none;
   position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px;
+  top: calc(100% + 6px);
+  left: 0;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 6px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 180px;
+  min-width: 200px;
   z-index: 100;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow);
+  animation: fade-in 0.15s ease;
 }
 
 .lang-option {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-primary);
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   text-align: left;
   transition: background-color 0.2s ease;
 }
 
 .lang-option:hover {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-hover);
 }
 
 .lang-option.active {
@@ -73,12 +75,22 @@
   font-weight: 600;
 }
 
+.lang-check {
+  margin-left: auto;
+}
+
 @media (max-width: 768px) {
+  .lang-trigger {
+    width: auto;
+    padding: 7px 10px;
+  }
+
   .lang-trigger-label {
     display: none;
   }
 
-  .lang-trigger {
-    padding: 8px 10px;
+  .lang-dropdown {
+    left: auto;
+    right: 0;
   }
 }

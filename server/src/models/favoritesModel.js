@@ -8,10 +8,20 @@ export const addFavorite = async (userId, word, translation, language) => {
   return result.insertId;
 };
 
-export const getFavoritesByUser = async (userId) => {
+export const findFavorite = async (userId, word, language) => {
   const [rows] = await pool.query(
-    "SELECT * FROM favorite_words WHERE user_id = ?",
-    [userId],
+    "SELECT * FROM favorite_words WHERE user_id = ? AND word = ? AND language = ?",
+    [userId, word, language],
+  );
+  return rows[0];
+};
+
+export const getFavoritesByUser = async (userId, language) => {
+  const [rows] = await pool.query(
+    `SELECT * FROM favorite_words
+     WHERE user_id = ? ${language ? "AND language = ?" : ""}
+     ORDER BY created_at DESC, id DESC`,
+    language ? [userId, language] : [userId],
   );
   return rows;
 };

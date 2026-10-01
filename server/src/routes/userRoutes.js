@@ -1,12 +1,13 @@
 import express from "express";
-import { getMe, setLanguage } from "../controllers/userController.js";
+import { setLanguage } from "../controllers/userController.js";
 import authMiddleware from "../middleware/auth.js";
+import { languageBodyValidator } from "../middleware/validators.js";
+import { validate } from "../middleware/validate.js";
 
 const router = express.Router();
 
 router.use(authMiddleware);
 
-router.get("/me", getMe);
-router.put("/language", setLanguage);
+router.put("/language", languageBodyValidator, validate, setLanguage);
 
 export default router;

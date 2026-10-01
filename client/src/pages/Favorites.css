@@ -1,83 +1,63 @@
-.favorites {
-  max-width: 900px;
+.favorites-alert {
+  margin-bottom: 16px;
 }
 
-.favorites-header {
-  margin-bottom: 32px;
+.favorites-cta {
+  margin-top: 16px;
 }
 
-.favorites-header h1 {
-  font-size: 28px;
-  margin-bottom: 6px;
+.favorites-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-.favorites-header p {
-  color: var(--text-secondary);
-  font-size: 15px;
+.favorites-search {
+  max-width: 280px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .favorites-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
 
 .favorite-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.favorite-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent-cyan);
-}
-
-.lang-badge {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent-cyan);
-  background-color: rgba(0, 212, 255, 0.1);
-  padding: 4px 8px;
-  border-radius: 6px;
-  width: fit-content;
+  gap: 8px;
+  padding: 20px;
 }
 
 .favorite-card h3 {
-  font-size: 18px;
-  color: var(--text-primary);
+  font-size: 19px;
+  overflow-wrap: anywhere;
 }
 
 .favorite-card p {
   color: var(--text-secondary);
   font-size: 14px;
   flex: 1;
+  overflow-wrap: anywhere;
 }
 
-.delete-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-secondary);
-  font-size: 13px;
-  padding: 6px 10px;
-  transition: all 0.2s ease;
-  width: fit-content;
+.favorite-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
 }
 
-.delete-btn:hover {
-  border-color: var(--error);
-  color: var(--error);
-}
-
-.empty-state {
-  color: var(--text-secondary);
-  font-size: 15px;
+@media (max-width: 768px) {
+  .favorites-search {
+    max-width: none;
+  }
 }

@@ -1,20 +1,22 @@
-import jwt from "jsonwebtoken";
+import { AUTH_COOKIE, verifyToken } from "../utils/authToken.js";
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  // Cookie for the web client; Bearer header kept for API tools like test.http.
+  const header = req.headers.authorization;
+  const token =
+    req.cookies?.[AUTH_COOKIE] ||
+    (header?.startsWith("Bearer ") ? header.slice(7) : null);
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+  if (!token) {
+    return res.status(401).json({ message: "Not authenticated" });
   }
 
-  const token = authHeader.split(" ")[1];
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const { id, username } = verifyToken(token);
+    req.user = { id, username };
     next();
-  } catch (error) {
-    res.status(401).json({ message: "Invalid or expired token" });
+  } catch {
+    res.status(401).json({ message: "Invalid or expired session" });
   }
 };
 

@@ -1,54 +1,38 @@
-.category-select {
-  max-width: 900px;
-}
-
-.category-header {
+.deck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
   margin-bottom: 32px;
 }
 
-.category-header h1 {
-  font-size: 28px;
-  margin-bottom: 6px;
-}
-
-.category-header p {
-  color: var(--text-secondary);
-  font-size: 15px;
-}
-
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-}
-
-.category-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 28px 16px;
+.deck-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  transition: all 0.2s ease;
+  gap: 8px;
+  padding: 28px 16px;
+  text-align: center;
 }
 
-.category-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent-cyan);
+.deck-icon {
+  font-size: 36px;
+  margin-bottom: 4px;
 }
 
-.category-icon {
-  font-size: 32px;
+.deck-card h3 {
+  font-size: 16px;
 }
 
-.category-card h3 {
-  font-size: 15px;
-  color: var(--text-primary);
-}
-
-.empty-state {
+.deck-count {
+  font-size: 13px;
   color: var(--text-secondary);
-  font-size: 15px;
+}
+
+.deck-grid-personal .deck-card {
+  background: var(--gradient-soft), var(--bg-card);
+}
+
+.deck-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

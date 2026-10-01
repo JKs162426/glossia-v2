@@ -1,39 +1,65 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { findUserByEmail, createUser } from "../models/userModel.js";
-import dotenv from "dotenv";
+import config from "./env.js";
+import {
+  findUserByEmail,
+  findUserById,
+  createUser,
+  usernameExists,
+} from "../models/userModel.js";
 
-dotenv.config();
+// "María José" -> "Maria_Jose", then "Maria_Jose_2"... until it's free,
+// because usernames are UNIQUE and display names are not.
+const uniqueUsernameFrom = async (displayName, email) => {
+  const base =
+    (displayName || email.split("@")[0])
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 25) || "user";
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/auth/google/callback",
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        console.log("Google profile:", profile.emails[0].value);
+  let candidate = base.length >= 3 ? base : `${base}_user`;
+  for (let n = 2; await usernameExists(candidate); n++) {
+    candidate = `${base}_${n}`;
+  }
+  return candidate;
+};
 
-        const email = profile.emails[0].value;
-        let user = await findUserByEmail(email);
+if (config.googleEnabled) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        ...config.google,
+        // OAuth "state" parameter protects the callback against CSRF.
+        state: true,
+      },
+      async (_accessToken, _refreshToken, profile, done) => {
+        try {
+          const googleEmail = profile.emails?.[0];
+          if (!googleEmail?.value || googleEmail.verified === false) {
+            return done(null, false, { message: "Google email not verified" });
+          }
 
-        if (!user) {
-          const userId = await createUser(
-            profile.displayName.replace(/\s+/g, "_"),
-            email,
-            "google_oauth"
-          );
-          user = { id: userId, username: profile.displayName, email };
+          const email = googleEmail.value.toLowerCase();
+          let user = await findUserByEmail(email);
+
+          if (!user) {
+            const username = await uniqueUsernameFrom(
+              profile.displayName,
+              email,
+            );
+            const userId = await createUser(username, email);
+            user = await findUserById(userId);
+          }
+
+          return done(null, user);
+        } catch (error) {
+          return done(error);
         }
-
-        return done(null, user);
-      } catch (error) {
-        return done(error, null);
-      }
-    }
-  )
-);
+      },
+    ),
+  );
+}
 
 export default passport;

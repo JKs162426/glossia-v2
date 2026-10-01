@@ -1,13 +1,17 @@
 import pool from "../config/db.js";
 
-export const createUser = async (username, email, hashedPassword) => {
+const PUBLIC_FIELDS = "id, username, email, target_language, created_at";
+
+// password is NULL for accounts created through Google sign-in.
+export const createUser = async (username, email, hashedPassword = null) => {
   const [result] = await pool.query(
     "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-    [username, email, hashedPassword]
+    [username, email, hashedPassword],
   );
   return result.insertId;
 };
 
+// Includes the password hash — only for credential checks, never send it out.
 export const findUserByEmail = async (email) => {
   const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
     email,
@@ -17,10 +21,17 @@ export const findUserByEmail = async (email) => {
 
 export const findUserById = async (id) => {
   const [rows] = await pool.query(
-    "SELECT id, username, email, created_at FROM users WHERE id = ?",
-    [id]
+    `SELECT ${PUBLIC_FIELDS} FROM users WHERE id = ?`,
+    [id],
   );
   return rows[0];
+};
+
+export const usernameExists = async (username) => {
+  const [rows] = await pool.query("SELECT 1 FROM users WHERE username = ?", [
+    username,
+  ]);
+  return rows.length > 0;
 };
 
 export const updateTargetLanguage = async (userId, language) => {
@@ -28,12 +39,4 @@ export const updateTargetLanguage = async (userId, language) => {
     language,
     userId,
   ]);
-};
-
-export const findUserWithLanguage = async (id) => {
-  const [rows] = await pool.query(
-    "SELECT id, username, email, target_language FROM users WHERE id = ?",
-    [id]
-  );
-  return rows[0];
 };

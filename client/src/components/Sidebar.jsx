@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import "./Sidebar.css";
+import { useAuth } from "../context/auth-context";
 import LanguageSelector from "./LanguageSelector";
+import "./Sidebar.css";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: "🏠" },
+  { path: "/learn", label: "Learn", icon: "🎯" },
   { path: "/flashcards", label: "Flashcards", icon: "🃏" },
   { path: "/translator", label: "Translator", icon: "🔤" },
   { path: "/favorites", label: "Favorites", icon: "⭐" },
@@ -12,46 +13,69 @@ const navItems = [
 
 function Sidebar() {
   const { user, logout } = useAuth();
+  const initial = (user?.username || "?").charAt(0).toUpperCase();
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <h1>Glossia</h1>
-        <span>v2</span>
-      </div>
-
-      <div className="sidebar-lang-desktop">
-        <LanguageSelector />
-      </div>
-
-      <div className="sidebar-user">
-        <div className="avatar">{user?.username[0].toUpperCase()}</div>
-        <p>{user?.username}</p>
-      </div>
-
-      <nav className="sidebar-nav">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === "/"}
-            className={({ isActive }) =>
-              isActive ? "nav-item active" : "nav-item"
-            }
+    <>
+      {/* Mobile-only top bar: logo, language and logout */}
+      <header className="mobile-topbar">
+        <span className="sidebar-logo-text gradient-text">Glossia</span>
+        <div className="mobile-topbar-actions">
+          <LanguageSelector />
+          <button
+            className="icon-btn"
+            onClick={logout}
+            aria-label="Log out"
+            title="Log out"
           >
-            <span className="nav-icon">{item.icon}</span>
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
+            🚪
+          </button>
+        </div>
+      </header>
 
-      <button className="logout-btn" onClick={logout}>
-        🚪 Logout
-      </button>
-      <div className="sidebar-lang-mobile">
-        <LanguageSelector />
-      </div>
-    </aside>
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <span className="sidebar-logo-text gradient-text">Glossia</span>
+          <span className="sidebar-version">v2</span>
+        </div>
+
+        <div className="sidebar-lang">
+          <span className="sidebar-label">Learning</span>
+          <LanguageSelector />
+        </div>
+
+        <nav className="sidebar-nav" aria-label="Main">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === "/"}
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <span className="nav-icon" aria-hidden="true">
+                {item.icon}
+              </span>
+              <span className="nav-label">{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="avatar" aria-hidden="true">
+              {initial}
+            </div>
+            <div className="sidebar-user-info">
+              <p className="sidebar-username">{user?.username}</p>
+              <p className="sidebar-email">{user?.email}</p>
+            </div>
+          </div>
+          <button className="logout-btn" onClick={logout}>
+            <span aria-hidden="true">🚪</span> Log out
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
 

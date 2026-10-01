@@ -1,31 +1,25 @@
 import {
   getAllCategories,
+  getCategoryById,
   getWordsByCategory,
 } from "../models/categoryModel.js";
 
 export const listCategories = async (req, res) => {
-  try {
-    const categories = await getAllCategories();
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
+  res.json(await getAllCategories(req.query.language));
 };
 
-export const getCategoryWords = async (req, res) => {
-  const { id } = req.params;
-  const { language } = req.query;
-
-  if (!language) {
-    return res
-      .status(400)
-      .json({ message: "Language query param is required" });
+// Returns the deck as flashcards: `term` is in the language being learned,
+// `meaning` in the reference language (category_words stores them as
+// translation/word respectively).
+export const getCategoryDeck = async (req, res) => {
+  const category = await getCategoryById(req.params.id);
+  if (!category) {
+    return res.status(404).json({ message: "Category not found" });
   }
 
-  try {
-    const words = await getWordsByCategory(id, language);
-    res.json(words);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
+  const words = await getWordsByCategory(req.params.id, req.query.language);
+  res.json({
+    category,
+    cards: words.map((w) => ({ id: w.id, term: w.translation, meaning: w.word })),
+  });
 };

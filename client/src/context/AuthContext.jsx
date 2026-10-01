@@ -1,49 +1,61 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import api from "../services/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import api, { setUnauthorizedHandler } from "../services/api";
+import { AuthContext } from "./auth-context";
 
-const AuthContext = createContext();
-
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
+  // The server is the source of truth: ask it who we are instead of trusting
+  // a user object cached in localStorage.
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await api.get("/auth/me");
+      setUser(res.data.user);
+      return res.data.user;
+    } catch {
+      setUser(null);
+      return null;
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const res = await api.post("/auth/login", { email, password });
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-    setUser(res.data.user);
-  };
-
-  const register = async (username, email, password) => {
-    await api.post("/auth/register", { username, email, password });
-  };
-
-  const logout = () => {
+  useEffect(() => {
+    // Clean up data stored by the previous localStorage-based auth.
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setUser(null);
-  };
 
-  const setUserFromOAuth = (user) => {
-    setUser(user);
-  };
+    setUnauthorizedHandler(() => setUser(null));
+    api
+      .get("/auth/me")
+      .then((res) => setUser(res.data.user))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
+  }, []);
 
-  return (
-    <AuthContext.Provider
-      value={{ user, login, register, logout, loading, setUserFromOAuth }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const login = useCallback(async (email, password) => {
+    const res = await api.post("/auth/login", { email, password });
+    setUser(res.data.user);
+  }, []);
+
+  const register = useCallback(async (username, email, password) => {
+    const res = await api.post("/auth/register", { username, email, password });
+    setUser(res.data.user);
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await api.post("/auth/logout");
+    } finally {
+      setUser(null);
+    }
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, loading, login, register, logout, refreshUser, setUser }),
+    [user, loading, login, register, logout, refreshUser],
   );
-};
 
-export const useAuth = () => useContext(AuthContext);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
