@@ -42,15 +42,16 @@ router.get("/google", (req, res, next) => {
   );
 });
 
-router.get(
-  "/google/callback",
-  (req, res, next) =>
-    config.googleEnabled ? next() : res.redirect(googleFailure),
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: googleFailure,
-  }),
-  googleCallback,
-);
+// Any failure (cancelled consent, bad state, expired code, Google outage)
+// sends the user back to the login page instead of an error response.
+router.get("/google/callback", (req, res, next) => {
+  if (!config.googleEnabled) return res.redirect(googleFailure);
+  passport.authenticate("google", { session: false }, (err, user) => {
+    if (err) console.error("Google sign-in failed:", err.message);
+    if (err || !user) return res.redirect(googleFailure);
+    req.user = user;
+    googleCallback(req, res);
+  })(req, res, next);
+});
 
 export default router;

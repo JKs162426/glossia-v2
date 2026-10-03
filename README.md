@@ -41,8 +41,8 @@ register `http://localhost:3000/api/auth/google/callback` as a redirect URI.
   so scripts on the page can't read it.
 - Passwords: bcrypt (12 rounds), min 8 chars with a letter and a number.
 - Rate limits on login/register and on the whole API; security headers via helmet.
-- Google OAuth uses the `state` parameter and never puts tokens in URLs.
-- The API refuses to start without `JWT_SECRET` / `SESSION_SECRET`.
+- Google OAuth uses the `state` parameter (kept in a short-lived cookie) and never puts tokens in URLs.
+- The API refuses to start without `JWT_SECRET`.
 
 ### Adding a lesson
 

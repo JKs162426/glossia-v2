@@ -9,7 +9,6 @@ const required = [
   "DB_USER",
   "DB_NAME",
   "JWT_SECRET",
-  "SESSION_SECRET",
 ];
 const missing = required.filter((key) => !process.env[key]);
 if (missing.length) {
@@ -24,25 +23,33 @@ if (isProd && process.env.JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
+// On Render the app is served from one origin; Render provides its public URL.
+const publicUrl = process.env.RENDER_EXTERNAL_URL;
+
+// Managed MySQL (e.g. Aiven) requires TLS. The CA certificate is passed as an
+// env var; "\n" escapes are accepted so it can be pasted on a single line.
+const sslCa = process.env.DB_SSL_CA?.replace(/\\n/g, "\n");
+
 const config = {
   isProd,
   port: Number(process.env.PORT) || 3000,
-  clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
+  clientUrl: process.env.CLIENT_URL || publicUrl || "http://localhost:5173",
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  sessionSecret: process.env.SESSION_SECRET,
   db: {
     host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+    ssl: sslCa ? { ca: sslCa, rejectUnauthorized: true } : undefined,
   },
   google: {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL:
       process.env.GOOGLE_CALLBACK_URL ||
-      "http://localhost:3000/api/auth/google/callback",
+      `${publicUrl || "http://localhost:3000"}/api/auth/google/callback`,
   },
 };
 

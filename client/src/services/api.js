@@ -1,6 +1,9 @@
 import axios from "axios";
 
-export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// In production the API serves this app, so a relative URL is enough.
+export const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? "http://localhost:3000/api" : "/api");
 
 // The session lives in an httpOnly cookie set by the API, so the token is
 // never readable from JavaScript; we only need to send cookies along.

@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import config from "./env.js";
+import { cookieStateStore } from "../utils/oauthStateStore.js";
 import {
   findUserByEmail,
   findUserById,
@@ -32,7 +33,7 @@ if (config.googleEnabled) {
       {
         ...config.google,
         // OAuth "state" parameter protects the callback against CSRF.
-        state: true,
+        store: cookieStateStore,
       },
       async (_accessToken, _refreshToken, profile, done) => {
         try {
