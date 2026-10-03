@@ -66,7 +66,22 @@ const clientDist = path.resolve(
   "../../client/dist",
 );
 if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist, { index: false, maxAge: "1y", immutable: true }));
+  app.use(
+    express.static(clientDist, {
+      index: false,
+      setHeaders(res, filePath) {
+        // Vite's /assets files have a content hash in their name, so they can
+        // be cached forever. Favicons, the share image, etc. keep their name
+        // when they change, so they must be revalidated.
+        res.setHeader(
+          "Cache-Control",
+          filePath.includes(`${path.sep}assets${path.sep}`)
+            ? "public, max-age=31536000, immutable"
+            : "public, max-age=3600, must-revalidate",
+        );
+      },
+    }),
+  );
   // Client-side routes (/learn, /flashcards/3…) all load index.html.
   app.get("/{*path}", (req, res) => {
     res.set("Cache-Control", "no-cache");
