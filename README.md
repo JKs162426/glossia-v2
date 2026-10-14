@@ -3,8 +3,29 @@
 A language-learning app: a guided A1–A2 learning path, flashcards, a translator
 and saved favorites, in 8 languages (EN, ES, FR, DE, IT, PT, RU, ZH).
 
-- **client/** — React 19 + Vite
-- **server/** — Express 5 + MySQL
+**Live:** <https://glossia-v2.onrender.com> — hosted on Render's free tier, so
+the first load can take up to a minute while the server wakes up.
+
+[![Glossia — sign-in screen](docs/screenshot.jpg)](https://glossia-v2.onrender.com)
+
+## Features
+
+- **Learning path** — A1 and A2 units with lessons that unlock in order
+- **Flashcards** by category, with progress tracking
+- **Translator** powered by the [MyMemory](https://mymemory.translated.net) API
+- **Favorites** — save words and phrases to review later
+- **Accounts** with email/password or Google sign-in
+
+## Stack
+
+| Layer | Tech |
+| --- | --- |
+| Frontend (`client/`) | React 19, React Router, Vite, Axios |
+| Backend (`server/`) | Node.js, Express 5, express-validator |
+| Database | MySQL (`mysql2`), SQL migrations |
+| Auth | JWT in an httpOnly cookie, bcrypt, Passport (Google OAuth 2.0) |
+| Security | helmet, express-rate-limit |
+| Deploy | Render |
 
 ## Setup
 
@@ -49,3 +70,7 @@ register `http://localhost:3000/api/auth/google/callback` as a redirect URI.
 Add an entry to a unit's `lessons` in `curriculum.js` with the word in all 8
 languages. The server checks at startup that no level repeats a word in the
 same language.
+
+## Author
+
+Built by [Jesus Figueroa](https://jfigueroa.dev) · [GitHub](https://github.com/JKs162426)
