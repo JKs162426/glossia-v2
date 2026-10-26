@@ -91,8 +91,6 @@ if (fs.existsSync(clientDist)) {
 
 app.use(errorHandler);
 
-app.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`);
-});
-
+// The app is exported without listening so tests can drive it with
+// Supertest; src/server.js is the entry point that opens the port.
 export default app;
