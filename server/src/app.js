@@ -20,7 +20,7 @@ import { notFound, errorHandler } from "./middleware/errorHandler.js";
 const app = express();
 
 app.disable("x-powered-by");
-if (config.isProd) app.set("trust proxy", 1);
+if (config.isProd) app.set("trust proxy", config.trustProxyHops);
 
 app.use(
   helmet({

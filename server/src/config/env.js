@@ -33,6 +33,9 @@ const sslCa = process.env.DB_SSL_CA?.replace(/\\n/g, "\n");
 const config = {
   isProd,
   port: Number(process.env.PORT) || 3000,
+  // How many reverse proxies sit in front of the app. req.ip (and so the
+  // rate limiter) is only the real client IP when this matches the host.
+  trustProxyHops: Number(process.env.TRUST_PROXY_HOPS) || 1,
   clientUrl: process.env.CLIENT_URL || publicUrl || "http://localhost:5173",
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
