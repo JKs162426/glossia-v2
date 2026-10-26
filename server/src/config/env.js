@@ -1,6 +1,19 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 
-dotenv.config({ quiet: true });
+const isTest = process.env.NODE_ENV === "test";
+
+// Tests read only server/.env.test, never .env, so they can't pick up the
+// real database. Paths are resolved from this file, not the working directory.
+dotenv.config({
+  path: path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "../..",
+    isTest ? ".env.test" : ".env",
+  ),
+  quiet: true,
+});
 
 // Fail fast: the API must never start with missing secrets (e.g. an
 // undefined JWT_SECRET would make every token trivially forgeable).
@@ -13,6 +26,12 @@ const required = [
 const missing = required.filter((key) => !process.env[key]);
 if (missing.length) {
   console.error(`Missing required env vars: ${missing.join(", ")}`);
+  process.exit(1);
+}
+
+// Integration tests create and wipe data; refuse anything but a *_test database.
+if (isTest && !/_test$/.test(process.env.DB_NAME)) {
+  console.error(`Tests must use a database ending in "_test" (got "${process.env.DB_NAME}")`);
   process.exit(1);
 }
 
@@ -32,6 +51,7 @@ const sslCa = process.env.DB_SSL_CA?.replace(/\\n/g, "\n");
 
 const config = {
   isProd,
+  isTest,
   port: Number(process.env.PORT) || 3000,
   // How many reverse proxies sit in front of the app. req.ip (and so the
   // rate limiter) is only the real client IP when this matches the host.
