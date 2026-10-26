@@ -63,8 +63,10 @@ register `http://localhost:3000/api/auth/google/callback` as a redirect URI.
 - Passwords: bcrypt (12 rounds), min 8 chars with a letter and a number.
 - Rate limits on login/register and on the whole API; security headers via helmet.
   Limits are counted per client IP, so in production `TRUST_PROXY_HOPS` must
-  match the number of proxies in front of the app (check that the
-  `RateLimit-Policy` header's `pk` changes per visitor, not per proxy).
+  match the number of proxies in front of the app — **3 on Render**. To check
+  it, the `pk` in the `RateLimit-Policy` header must equal the base64 of the
+  first 12 hex chars of `sha256(your IP)`, and must not change when you send a
+  fake `X-Forwarded-For`.
 - Google OAuth uses the `state` parameter (kept in a short-lived cookie) and never puts tokens in URLs.
 - The API refuses to start without `JWT_SECRET`.
 

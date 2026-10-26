@@ -15,6 +15,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      # Render puts 3 proxies in front of the app (verified 2026-10-25), so
+      # req.ip — and the rate limiter — see the real visitor IP.
+      - key: TRUST_PROXY_HOPS
+        value: "3"
       - key: JWT_SECRET
         generateValue: true
       # Managed MySQL (e.g. Aiven) — fill these in on the Render dashboard
