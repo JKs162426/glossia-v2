@@ -7,6 +7,7 @@ import { baseLanguageFor, getLanguage } from "../lib/languages";
 import { canSpeak, speak } from "../lib/speech";
 import { shuffle } from "../lib/utils";
 import Loader from "../components/Loader";
+import { Icon, LanguageMark } from "../components/Icon";
 import "./Flashcards.css";
 
 // Normalizes both deck sources to { id, term, meaning }:
@@ -15,7 +16,7 @@ const toDeck = (deckId, data) =>
   deckId === "favorites"
     ? {
         name: "My favorites",
-        icon: "⭐",
+        icon: "star",
         categoryId: null,
         cards: data.map((f) => ({ id: f.id, term: f.word, meaning: f.translation })),
       }
@@ -101,8 +102,8 @@ function DeckSession({ deck, language }) {
 
     return (
       <div className="card results-card">
-        <span className="results-emoji" aria-hidden="true">
-          {pct === 100 ? "🏆" : pct >= 70 ? "🎉" : "💪"}
+        <span className="icon-tile icon-tile-xl results-emoji">
+          <Icon name={pct === 100 ? "trophy" : pct >= 70 ? "sparkles" : "target"} size={44} />
         </span>
         <h2>Session complete!</h2>
         <p className="score gradient-text">
@@ -167,7 +168,13 @@ function DeckSession({ deck, language }) {
           }}
           title="Switch which side is shown first"
         >
-          ⇄ {showTermFirst ? `${target.flag} → ${base.flag}` : `${base.flag} → ${target.flag}`}
+          <Icon name="swap" size={16} />
+          <LanguageMark code={(showTermFirst ? target : base).code} size="sm" />
+          <Icon name="arrow-right" size={14} />
+          <LanguageMark code={(showTermFirst ? base : target).code} size="sm" />
+          <span className="sr-only">
+            Showing {(showTermFirst ? target : base).label} first. Switch direction
+          </span>
         </button>
       </div>
 
@@ -183,16 +190,12 @@ function DeckSession({ deck, language }) {
       >
         <div className="flashcard-inner">
           <div className="flashcard-face flashcard-front">
-            <span className="badge">
-              {front.lang.flag} {front.lang.label}
-            </span>
+            <span className="badge">{front.lang.label}</span>
             <h2>{front.text}</h2>
             <span className="card-hint">Tap or press Space to reveal</span>
           </div>
           <div className="flashcard-face flashcard-back">
-            <span className="badge">
-              {back.lang.flag} {back.lang.label}
-            </span>
+            <span className="badge">{back.lang.label}</span>
             <h2>{back.text}</h2>
             <span className="card-hint">Did you know it?</span>
           </div>
@@ -206,14 +209,20 @@ function DeckSession({ deck, language }) {
             onClick={() => speak(card.term, language)}
             aria-label={`Listen to ${card.term}`}
           >
-            🔊
+            <Icon name="speaker" />
           </button>
         )}
         <button className="btn btn-error" onClick={() => answer(false)} disabled={!flipped}>
-          ✗ Still learning <kbd>←</kbd>
+          <Icon name="close" size={18} /> Still learning{" "}
+          <kbd>
+            <Icon name="arrow-left" size={12} label="Left arrow key" />
+          </kbd>
         </button>
         <button className="btn btn-success" onClick={() => answer(true)} disabled={!flipped}>
-          ✓ Got it <kbd>→</kbd>
+          <Icon name="check" size={18} /> Got it{" "}
+          <kbd>
+            <Icon name="arrow-right" size={12} label="Right arrow key" />
+          </kbd>
         </button>
       </div>
     </>
@@ -235,10 +244,15 @@ function Flashcards() {
       <header className="page-header">
         <div>
           <Link to="/flashcards" className="back-link">
-            ← All decks
+            <Icon name="arrow-left" size={14} /> All decks
           </Link>
-          <h1>
-            {deck ? `${deck.name} ${deck.icon}` : "Flashcards"}
+          <h1 className="deck-title">
+            {deck && (
+              <span className="icon-tile">
+                <Icon name={deck.icon} size={22} />
+              </span>
+            )}
+            {deck ? deck.name : "Flashcards"}
           </h1>
         </div>
       </header>
@@ -248,7 +262,9 @@ function Flashcards() {
 
       {deck && deck.cards.length === 0 && (
         <div className="card empty-state">
-          <span className="empty-icon">🗂️</span>
+          <span className="icon-tile icon-tile-lg empty-icon">
+            <Icon name="cards" size={26} />
+          </span>
           <p>
             {deckId === "favorites"
               ? `You haven't saved any ${getLanguage(targetLanguage).label} words yet.`

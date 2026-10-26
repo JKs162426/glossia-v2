@@ -8,6 +8,7 @@ import { buildExercises, checkTyped } from "../lib/exercises";
 import { canSpeak, speak } from "../lib/speech";
 import { errorMessage, shuffle } from "../lib/utils";
 import Loader from "../components/Loader";
+import { Icon } from "../components/Icon";
 import "./Lesson.css";
 
 function SpeakButton({ text, language, large = false }) {
@@ -20,7 +21,7 @@ function SpeakButton({ text, language, large = false }) {
       aria-label="Listen"
       title="Listen"
     >
-      🔊
+      <Icon name="speaker" size={large ? 44 : 22} />
     </button>
   );
 }
@@ -102,20 +103,25 @@ function Results({ lesson, result, saving, saveError, onRetrySave, accuracy }) {
 
   return (
     <div className="lesson-results">
-      <div className="results-trophy" aria-hidden="true">
-        {lesson.type === "checkpoint" ? "🏆" : "🎉"}
+      <div className="icon-tile icon-tile-xl results-trophy">
+        <Icon name={lesson.type === "checkpoint" ? "trophy" : "sparkles"} size={44} />
       </div>
       <h1>{lesson.type === "checkpoint" ? "Checkpoint passed!" : "Lesson complete!"}</h1>
       {result?.levelCompleted && (
-        <p className="alert alert-success">You finished level {lesson.level}! 🎊</p>
+        <p className="alert alert-success">You finished level {lesson.level}!</p>
       )}
 
       {result && (
         <div className="results-stars" aria-label={`${result.stars} of 3 stars`}>
           {[1, 2, 3].map((n) => (
-            <span key={n} className={n <= result.stars ? "on" : ""} style={{ animationDelay: `${n * 0.15}s` }}>
-              ★
-            </span>
+            <Icon
+              key={n}
+              name="star"
+              size={44}
+              filled
+              className={n <= result.stars ? "on" : ""}
+              style={{ animationDelay: `${n * 0.15}s` }}
+            />
           ))}
         </div>
       )}
@@ -147,7 +153,7 @@ function Results({ lesson, result, saving, saveError, onRetrySave, accuracy }) {
             onClick={() => navigate(`/learn/${result.nextLessonId}`, { replace: true })}
             autoFocus
           >
-            Next lesson →
+            Next lesson <Icon name="arrow-right" size={18} />
           </button>
         )}
         <Link to="/learn" className="btn btn-secondary btn-block">
@@ -300,7 +306,7 @@ function LessonRunner({ lesson }) {
     <div className="lesson-screen">
       <header className="lesson-topbar">
         <button className="icon-btn" onClick={exit} aria-label="Exit lesson">
-          ✕
+          <Icon name="close" />
         </button>
         <div
           className="progress lesson-progress"
@@ -318,7 +324,8 @@ function LessonRunner({ lesson }) {
 
       <main className="lesson-body" key={`${exercise.id}-${position}`}>
         <p className="lesson-unit">
-          {lesson.unitIcon} {lesson.level} · {lesson.title}
+          <Icon name={lesson.unitIcon} size={16} className="lesson-unit-icon" />
+          {lesson.level} · {lesson.title}
           {position >= total && <span className="badge retry-badge">Review</span>}
         </p>
         <h2 className="lesson-prompt">{prompts[exercise.type]}</h2>
@@ -387,7 +394,10 @@ function LessonRunner({ lesson }) {
           <div className="feedback-text" role="status" aria-live="polite">
             {feedback && (
               <>
-                <strong>{feedback.correct ? "✓ Correct!" : "✗ Not quite"}</strong>
+                <strong className="feedback-title">
+                  <Icon name={feedback.correct ? "check" : "close"} size={22} />
+                  {feedback.correct ? "Correct!" : "Not quite"}
+                </strong>
                 {!feedback.correct && exercise.card && (
                   <span>
                     Answer: {exercise.answer}
@@ -436,7 +446,9 @@ function Lesson() {
     return (
       <div className="lesson-screen lesson-error">
         <p className="empty-state">
-          <span className="empty-icon">🔒</span>
+          <span className="icon-tile icon-tile-lg empty-icon">
+            <Icon name="lock" size={26} />
+          </span>
           {error}
         </p>
         <Link to="/learn" className="btn btn-primary">

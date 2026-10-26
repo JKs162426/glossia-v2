@@ -4,6 +4,7 @@ import api from "../services/api";
 import { useLanguage } from "../context/language-context";
 import { LANGUAGES, baseLanguageFor, getLanguage } from "../lib/languages";
 import { canSpeak, speak } from "../lib/speech";
+import { Icon } from "../components/Icon";
 import "./Translator.css";
 
 const MAX_CHARS = 500; // MyMemory's limit per request
@@ -123,12 +124,12 @@ function Translator() {
     }
   };
 
-  const saveLabel = {
-    idle: "⭐ Save to favorites",
-    saving: "Saving…",
-    saved: "✅ Saved!",
-    exists: "⭐ Already saved",
-    error: "Couldn't save — retry",
+  const [saveIcon, saveText] = {
+    idle: ["star", "Save to favorites"],
+    saving: ["star", "Saving…"],
+    saved: ["check", "Saved!"],
+    exists: ["star", "Already saved"],
+    error: ["close", "Couldn't save — retry"],
   }[saveState];
 
   const languageSelect = (id, value, onChange, label) => (
@@ -137,7 +138,7 @@ function Translator() {
       <select id={id} className="select" value={value} onChange={(e) => onChange(e.target.value)}>
         {LANGUAGES.map((l) => (
           <option key={l.code} value={l.code}>
-            {l.flag} {l.label}
+            {l.label}
           </option>
         ))}
       </select>
@@ -148,7 +149,7 @@ function Translator() {
     <div className="page translator">
       <header className="page-header">
         <div>
-          <h1>Translator 🔤</h1>
+          <h1>Translator</h1>
           <p>Translate words and phrases, then save them to practice later.</p>
         </div>
       </header>
@@ -162,7 +163,7 @@ function Translator() {
             aria-label="Swap languages"
             title="Swap languages"
           >
-            ⇄
+            <Icon name="swap" />
           </button>
           {languageSelect("target-lang", targetLang, setTargetLang, "Translate to")}
         </div>
@@ -181,12 +182,12 @@ function Translator() {
             <div className="panel-footer">
               {canSpeak && text && (
                 <button className="icon-btn" onClick={() => speak(text, sourceLang)} aria-label="Listen to the source text">
-                  🔊
+                  <Icon name="speaker" size={18} />
                 </button>
               )}
               {text && (
                 <button className="icon-btn" onClick={() => setText("")} aria-label="Clear text">
-                  ✕
+                  <Icon name="close" size={18} />
                 </button>
               )}
               <span className={`char-count ${text.length >= MAX_CHARS ? "limit" : ""}`}>
@@ -212,11 +213,11 @@ function Translator() {
                     onClick={() => speak(result.translated, result.target)}
                     aria-label="Listen to the translation"
                   >
-                    🔊
+                    <Icon name="speaker" size={18} />
                   </button>
                 )}
                 <button className="icon-btn" onClick={copy} aria-label="Copy translation">
-                  {copied ? "✓" : "⧉"}
+                  <Icon name={copied ? "check" : "copy"} size={18} />
                 </button>
                 {isStale && <span className="stale-note">Text changed — translate again</span>}
               </div>
@@ -242,14 +243,17 @@ function Translator() {
             onClick={saveFavorite}
             disabled={!result || isStale || ["saving", "saved", "exists"].includes(saveState)}
           >
-            {saveLabel}
+            <Icon name={saveIcon} size={18} filled={saveState === "exists"} />
+            {saveText}
           </button>
         </div>
 
         {saveState === "saved" && (
           <p className="save-hint">
             Saved as a {getLanguage(toFavorite(result, targetLanguage).language).label} word.{" "}
-            <Link to="/favorites">View favorites →</Link>
+            <Link to="/favorites" className="inline-icon-link">
+              View favorites <Icon name="arrow-right" size={14} />
+            </Link>
           </p>
         )}
       </div>

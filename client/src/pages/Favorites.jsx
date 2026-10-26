@@ -6,6 +6,7 @@ import { useApi } from "../hooks/useApi";
 import { getLanguage } from "../lib/languages";
 import { canSpeak, speak } from "../lib/speech";
 import Loader from "../components/Loader";
+import { Icon, LanguageMark } from "../components/Icon";
 import "./Favorites.css";
 
 function Favorites() {
@@ -42,12 +43,12 @@ function Favorites() {
     <div className="page favorites">
       <header className="page-header">
         <div>
-          <h1>Favorites ⭐</h1>
+          <h1>Favorites</h1>
           <p>Words and phrases you've saved from the translator.</p>
         </div>
         {practiceCount > 0 && (
           <Link to="/flashcards/favorites" className="btn btn-primary">
-            🃏 Practice {practiceCount} {target.label} {practiceCount === 1 ? "word" : "words"}
+            <Icon name="cards" size={18} /> Practice {practiceCount} {target.label} {practiceCount === 1 ? "word" : "words"}
           </Link>
         )}
       </header>
@@ -58,7 +59,9 @@ function Favorites() {
 
       {favorites && favorites.length === 0 && (
         <div className="card empty-state">
-          <span className="empty-icon">⭐</span>
+          <span className="icon-tile icon-tile-lg empty-icon">
+            <Icon name="star" size={26} />
+          </span>
           <p>No favorites yet. Translate something and save it!</p>
           <Link to="/translator" className="btn btn-primary favorites-cta">
             Open translator
@@ -93,7 +96,7 @@ function Favorites() {
                     onClick={() => setFilter(code)}
                     aria-pressed={filter === code}
                   >
-                    {getLanguage(code).flag} {getLanguage(code).label}
+                    <LanguageMark code={code} size="sm" /> {getLanguage(code).label}
                   </button>
                 ))}
               </div>
@@ -108,8 +111,8 @@ function Favorites() {
                 const lang = getLanguage(fav.language);
                 return (
                   <article key={fav.id} className="card card-interactive favorite-card">
-                    <span className="badge">
-                      {lang.flag} {lang.label}
+                    <span className="favorite-lang">
+                      <LanguageMark code={lang.code} size="sm" /> {lang.label}
                     </span>
                     <h3 lang={fav.language}>{fav.word}</h3>
                     <p>{fav.translation}</p>
@@ -120,7 +123,7 @@ function Favorites() {
                           onClick={() => speak(fav.word, fav.language)}
                           aria-label={`Listen to ${fav.word}`}
                         >
-                          🔊
+                          <Icon name="speaker" size={18} />
                         </button>
                       )}
                       <button
@@ -128,7 +131,7 @@ function Favorites() {
                         onClick={() => deleteFavorite(fav)}
                         aria-label={`Remove ${fav.word} from favorites`}
                       >
-                        🗑 Remove
+                        <Icon name="trash" size={16} /> Remove
                       </button>
                     </div>
                   </article>

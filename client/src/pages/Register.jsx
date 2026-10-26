@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import { AuthShell, GoogleButton, PasswordInput } from "../components/AuthShell";
+import { Icon } from "../components/Icon";
 import { errorMessage } from "../lib/utils";
 
 // Mirrors the server-side rules in server/src/middleware/validators.js
@@ -100,7 +101,7 @@ function Register() {
               const met = rule.test(form.password);
               return (
                 <li key={rule.label} className={met ? "met" : ""}>
-                  {met ? "✓" : "○"} {rule.label}
+                  <Icon name={met ? "check" : "ring"} size={12} /> {rule.label}
                 </li>
               );
             })}

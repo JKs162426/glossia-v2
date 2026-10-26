@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../context/language-context";
 import { LANGUAGES, getLanguage } from "../lib/languages";
+import { Icon, LanguageMark } from "./Icon";
 import "./LanguageSelector.css";
 
 function LanguageSelector() {
@@ -37,11 +38,9 @@ function LanguageSelector() {
         aria-expanded={open}
         aria-label={`Learning ${current.label}. Change language`}
       >
-        <span className="lang-flag">{current.flag}</span>
+        <LanguageMark code={current.code} />
         <span className="lang-trigger-label">{current.label}</span>
-        <span className="lang-arrow" aria-hidden="true">
-          ▾
-        </span>
+        <Icon name="chevron-down" size={16} className="lang-arrow" />
       </button>
 
       {open && (
@@ -54,12 +53,10 @@ function LanguageSelector() {
                 className={`lang-option ${lang.code === targetLanguage ? "active" : ""}`}
                 onClick={() => handleSelect(lang.code)}
               >
-                <span className="lang-flag">{lang.flag}</span>
+                <LanguageMark code={lang.code} size="sm" />
                 <span>{lang.label}</span>
                 {lang.code === targetLanguage && (
-                  <span className="lang-check" aria-hidden="true">
-                    ✓
-                  </span>
+                  <Icon name="check" size={16} className="lang-check" />
                 )}
               </button>
             </li>

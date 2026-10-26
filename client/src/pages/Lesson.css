@@ -96,7 +96,10 @@
   border-radius: var(--radius);
   background-color: var(--accent-cyan-soft);
   border: 1px solid rgba(0, 212, 255, 0.35);
-  font-size: 20px;
+  color: var(--accent-cyan);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.1s ease;
 }
 
@@ -107,7 +110,6 @@
 .speak-btn.large {
   width: 96px;
   height: 96px;
-  font-size: 40px;
   border-radius: var(--radius-xl);
   margin: 0 auto;
 }
@@ -246,7 +248,10 @@
   font-size: 14px;
 }
 
-.feedback-text strong {
+.feedback-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-display);
   font-size: 20px;
 }
@@ -279,19 +284,18 @@
 }
 
 .results-trophy {
-  font-size: 72px;
   animation: pop 0.5s ease;
+  box-shadow: 0 0 0 10px rgba(0, 212, 255, 0.08);
 }
 
 .results-stars {
-  font-size: 44px;
-  letter-spacing: 6px;
+  display: flex;
+  gap: 10px;
   color: var(--border-strong);
 }
 
 .results-stars .on {
   color: var(--gold);
-  display: inline-block;
   animation: pop 0.4s ease both;
 }
 

@@ -1,14 +1,15 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import LanguageSelector from "./LanguageSelector";
+import { Icon } from "./Icon";
 import "./Sidebar.css";
 
 const navItems = [
-  { path: "/", label: "Dashboard", icon: "🏠" },
-  { path: "/learn", label: "Learn", icon: "🎯" },
-  { path: "/flashcards", label: "Flashcards", icon: "🃏" },
-  { path: "/translator", label: "Translator", icon: "🔤" },
-  { path: "/favorites", label: "Favorites", icon: "⭐" },
+  { path: "/", label: "Dashboard", icon: "home" },
+  { path: "/learn", label: "Learn", icon: "path" },
+  { path: "/flashcards", label: "Flashcards", icon: "cards" },
+  { path: "/translator", label: "Translator", icon: "translate" },
+  { path: "/favorites", label: "Favorites", icon: "star" },
 ];
 
 function Sidebar() {
@@ -28,7 +29,7 @@ function Sidebar() {
             aria-label="Log out"
             title="Log out"
           >
-            🚪
+            <Icon name="logout" />
           </button>
         </div>
       </header>
@@ -52,9 +53,7 @@ function Sidebar() {
               end={item.path === "/"}
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="nav-icon" aria-hidden="true">
-                {item.icon}
-              </span>
+              <Icon name={item.icon} className="nav-icon" />
               <span className="nav-label">{item.label}</span>
             </NavLink>
           ))}
@@ -71,7 +70,7 @@ function Sidebar() {
             </div>
           </div>
           <button className="logout-btn" onClick={logout}>
-            <span aria-hidden="true">🚪</span> Log out
+            <Icon name="logout" size={18} /> Log out
           </button>
         </div>
       </aside>

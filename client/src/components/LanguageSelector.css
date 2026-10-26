@@ -21,19 +21,18 @@
   border-color: var(--accent-cyan);
 }
 
-.lang-flag {
-  font-size: 18px;
-  line-height: 1;
-}
-
 .lang-trigger-label {
   flex: 1;
   text-align: left;
 }
 
 .lang-arrow {
-  font-size: 10px;
   color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.lang-trigger[aria-expanded="true"] .lang-arrow {
+  transform: rotate(180deg);
 }
 
 .lang-dropdown {

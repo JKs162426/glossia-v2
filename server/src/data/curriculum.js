@@ -2,6 +2,7 @@
 // Each entry holds the same word/phrase in every supported language, so a
 // lesson works for whatever target language the learner picked. Nouns carry
 // their article because gender is part of learning the word.
+// Unit `icon`s are names from client/src/lib/icons.js.
 
 const w = (en, es, fr, de, it, pt, ru, zh, pinyin) => ({
   en,
@@ -23,7 +24,7 @@ export const LEVELS = [
     units: [
       {
         title: "First Words",
-        icon: "👋",
+        icon: "chat",
         lessons: [
           {
             title: "Hello!",
@@ -51,7 +52,7 @@ export const LEVELS = [
       },
       {
         title: "People & Family",
-        icon: "👨‍👩‍👧",
+        icon: "people",
         lessons: [
           {
             title: "People",
@@ -79,7 +80,7 @@ export const LEVELS = [
       },
       {
         title: "Numbers & Time",
-        icon: "🔢",
+        icon: "hash",
         lessons: [
           {
             title: "Numbers",
@@ -107,7 +108,7 @@ export const LEVELS = [
       },
       {
         title: "Food & Drink",
-        icon: "🍎",
+        icon: "apple",
         lessons: [
           {
             title: "In the Kitchen",
@@ -135,7 +136,7 @@ export const LEVELS = [
       },
       {
         title: "Colors & Things",
-        icon: "🎨",
+        icon: "palette",
         lessons: [
           {
             title: "Colors",
@@ -163,7 +164,7 @@ export const LEVELS = [
       },
       {
         title: "Everyday Verbs",
-        icon: "🏃",
+        icon: "activity",
         lessons: [
           {
             title: "Actions",
@@ -198,7 +199,7 @@ export const LEVELS = [
     units: [
       {
         title: "Travel",
-        icon: "✈️",
+        icon: "plane",
         lessons: [
           {
             title: "At the Airport",
@@ -226,7 +227,7 @@ export const LEVELS = [
       },
       {
         title: "Shopping & the City",
-        icon: "🛍️",
+        icon: "bag",
         lessons: [
           {
             title: "Shopping",
@@ -254,7 +255,7 @@ export const LEVELS = [
       },
       {
         title: "Health & Body",
-        icon: "🩺",
+        icon: "health",
         lessons: [
           {
             title: "The Body",
@@ -282,7 +283,7 @@ export const LEVELS = [
       },
       {
         title: "Work & Study",
-        icon: "💼",
+        icon: "briefcase",
         lessons: [
           {
             title: "At Work",
@@ -310,7 +311,7 @@ export const LEVELS = [
       },
       {
         title: "Weather & Nature",
-        icon: "🌦️",
+        icon: "weather",
         lessons: [
           {
             title: "Weather",
@@ -338,7 +339,7 @@ export const LEVELS = [
       },
       {
         title: "Feelings & Time",
-        icon: "💭",
+        icon: "heart",
         lessons: [
           {
             title: "Feelings",

@@ -50,7 +50,7 @@ export const getRecentFavorites = async (userId, limit = 4) => {
 export const getRecentSessions = async (userId, limit = 4) => {
   const [rows] = await pool.query(
     `SELECT s.id, s.language, s.correct, s.total, s.created_at,
-            COALESCE(c.name, 'Favorites') AS category, COALESCE(c.icon, '⭐') AS icon
+            COALESCE(c.name, 'Favorites') AS category, COALESCE(c.icon, 'star') AS icon
      FROM flashcard_sessions s
      LEFT JOIN categories c ON c.id = s.category_id
      WHERE s.user_id = ?

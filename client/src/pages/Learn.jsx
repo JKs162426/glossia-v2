@@ -3,6 +3,7 @@ import { useLanguage } from "../context/language-context";
 import { useApi } from "../hooks/useApi";
 import { getLanguage } from "../lib/languages";
 import Loader from "../components/Loader";
+import { Icon, LanguageMark } from "../components/Icon";
 import "./Learn.css";
 
 // Zig-zag offsets for the path nodes (in px, applied as translateX).
@@ -12,9 +13,7 @@ function Stars({ count }) {
   return (
     <span className="node-stars" aria-label={`${count} of 3 stars`}>
       {[1, 2, 3].map((n) => (
-        <span key={n} className={n <= count ? "on" : ""}>
-          ★
-        </span>
+        <Icon key={n} name="star" size={13} filled className={n <= count ? "on" : ""} />
       ))}
     </span>
   );
@@ -23,12 +22,12 @@ function Stars({ count }) {
 function PathNode({ node, offset }) {
   const icon =
     node.status === "locked"
-      ? "🔒"
+      ? "lock"
       : node.type === "checkpoint"
-        ? "🏆"
+        ? "trophy"
         : node.status === "completed"
-          ? "✓"
-          : "★";
+          ? "check"
+          : "star";
   const label = `${node.title} — ${
     node.status === "locked"
       ? "locked"
@@ -41,7 +40,7 @@ function PathNode({ node, offset }) {
     <>
       {node.status === "current" && <span className="node-bubble">Start</span>}
       <span className="node-circle" aria-hidden="true">
-        {icon}
+        <Icon name={icon} size={node.status === "locked" ? 24 : 28} filled={icon === "star"} />
       </span>
       <span className="node-title">{node.title}</span>
       {node.status === "completed" && <Stars count={node.stars} />}
@@ -71,7 +70,10 @@ function Learn() {
     <div className="page learn">
       <header className="page-header">
         <div>
-          <h1>Learn {language.label} {language.flag}</h1>
+          <h1>
+            Learn {language.label}{" "}
+            <LanguageMark code={language.code} size="lg" className="lang-mark-inline" />
+          </h1>
           <p>A guided path from your first words to everyday conversations.</p>
         </div>
       </header>
@@ -109,8 +111,8 @@ function Learn() {
             {level.units.map((unit, u) => (
               <div key={unit.id} className="unit">
                 <div className="unit-header">
-                  <span className="unit-icon" aria-hidden="true">
-                    {unit.icon}
+                  <span className="icon-tile">
+                    <Icon name={unit.icon} size={22} />
                   </span>
                   <div>
                     <span className="unit-number">Unit {u + 1}</span>

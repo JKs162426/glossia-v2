@@ -55,7 +55,7 @@ app.use("/api/learn", learnRoutes);
 app.use("/api/stats", statsRoutes);
 
 app.get("/api/health", (req, res) => {
-  res.json({ message: "Glossia API running 🚀" });
+  res.json({ message: "Glossia API running" });
 });
 app.use("/api", notFound);
 

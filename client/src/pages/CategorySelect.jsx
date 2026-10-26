@@ -3,14 +3,15 @@ import { useLanguage } from "../context/language-context";
 import { useApi } from "../hooks/useApi";
 import { getLanguage } from "../lib/languages";
 import Loader from "../components/Loader";
+import { Icon, LanguageMark } from "../components/Icon";
 import "./CategorySelect.css";
 
 function DeckCard({ to, icon, name, count }) {
   const empty = count === 0;
   const content = (
     <>
-      <span className="deck-icon" aria-hidden="true">
-        {icon}
+      <span className="icon-tile icon-tile-lg deck-icon">
+        <Icon name={icon} size={26} />
       </span>
       <h3>{name}</h3>
       <span className="deck-count">{empty ? "No cards yet" : `${count} cards`}</span>
@@ -38,9 +39,11 @@ function CategorySelect() {
     <div className="page">
       <header className="page-header">
         <div>
-          <h1>Flashcards 🃏</h1>
+          <h1>Flashcards</h1>
           <p>
-            Pick a deck to practice your {language.flag} {language.label} vocabulary.
+            Pick a deck to practice your{" "}
+            <LanguageMark code={language.code} size="sm" className="lang-mark-inline" />{" "}
+            {language.label} vocabulary.
           </p>
         </div>
       </header>
@@ -54,7 +57,7 @@ function CategorySelect() {
           <div className="deck-grid deck-grid-personal">
             <DeckCard
               to="/flashcards/favorites"
-              icon="⭐"
+              icon="star"
               name="My favorites"
               count={favorites.data?.length ?? 0}
             />

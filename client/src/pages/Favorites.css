@@ -37,6 +37,15 @@
   padding: 20px;
 }
 
+.favorite-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 .favorite-card h3 {
   font-size: 19px;
   overflow-wrap: anywhere;

@@ -1,13 +1,14 @@
 // Must stay in sync with server/src/config/languages.js
+// `mark` is the language's native initials, shown by <LanguageMark>.
 export const LANGUAGES = [
-  { code: "en", label: "English", flag: "🇬🇧", speech: "en-US" },
-  { code: "es", label: "Spanish", flag: "🇪🇸", speech: "es-ES" },
-  { code: "fr", label: "French", flag: "🇫🇷", speech: "fr-FR" },
-  { code: "de", label: "German", flag: "🇩🇪", speech: "de-DE" },
-  { code: "it", label: "Italian", flag: "🇮🇹", speech: "it-IT" },
-  { code: "pt", label: "Portuguese", flag: "🇧🇷", speech: "pt-BR" },
-  { code: "ru", label: "Russian", flag: "🇷🇺", speech: "ru-RU" },
-  { code: "zh", label: "Chinese", flag: "🇨🇳", speech: "zh-CN" },
+  { code: "en", label: "English", mark: "En", speech: "en-US" },
+  { code: "es", label: "Spanish", mark: "Es", speech: "es-ES" },
+  { code: "fr", label: "French", mark: "Fr", speech: "fr-FR" },
+  { code: "de", label: "German", mark: "De", speech: "de-DE" },
+  { code: "it", label: "Italian", mark: "It", speech: "it-IT" },
+  { code: "pt", label: "Portuguese", mark: "Pt", speech: "pt-BR" },
+  { code: "ru", label: "Russian", mark: "Ру", speech: "ru-RU" },
+  { code: "zh", label: "Chinese", mark: "中", speech: "zh-CN" },
 ];
 
 export const DEFAULT_LANGUAGE = "es";

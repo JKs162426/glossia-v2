@@ -1,5 +1,7 @@
 .back-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
   color: var(--text-secondary);
   margin-bottom: 8px;
@@ -96,6 +98,8 @@
 }
 
 .card-actions kbd {
+  display: inline-flex;
+  padding: 2px 4px;
   background: transparent;
   color: inherit;
   border-color: currentColor;
@@ -113,8 +117,10 @@
   padding: 36px 28px;
 }
 
-.results-emoji {
-  font-size: 56px;
+.deck-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .score {

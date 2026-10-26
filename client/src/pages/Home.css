@@ -24,7 +24,10 @@
   gap: 10px;
 }
 
-.continue-main h2 {
+.continue-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 24px;
 }
 
@@ -73,8 +76,7 @@
 }
 
 .stat-icon {
-  font-size: 22px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .stat-value {
@@ -218,10 +220,6 @@
   background-color: var(--bg-secondary);
 }
 
-.activity-icon {
-  font-size: 20px;
-}
-
 .activity-main {
   flex: 1;
   display: flex;
@@ -258,6 +256,10 @@
   border-radius: var(--radius);
   font-size: 13px;
   min-width: 0;
+}
+
+.favorite-chip .lang-mark {
+  margin-bottom: 6px;
 }
 
 .favorite-chip strong {

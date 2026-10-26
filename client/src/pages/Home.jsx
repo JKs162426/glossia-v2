@@ -4,6 +4,7 @@ import { useLanguage } from "../context/language-context";
 import { useApi } from "../hooks/useApi";
 import { getLanguage } from "../lib/languages";
 import Loader from "../components/Loader";
+import { Icon, LanguageMark } from "../components/Icon";
 import "./Home.css";
 
 const greeting = () => {
@@ -70,8 +71,11 @@ function ContinueCard({ nextLesson, levels }) {
             <span className="badge">
               {nextLesson.level} · {nextLesson.unitTitle}
             </span>
-            <h2>
-              <span aria-hidden="true">{nextLesson.unitIcon}</span> {nextLesson.title}
+            <h2 className="continue-title">
+              <span className="icon-tile">
+                <Icon name={nextLesson.unitIcon} size={22} />
+              </span>
+              {nextLesson.title}
             </h2>
             <p>
               {nextLesson.type === "checkpoint"
@@ -79,16 +83,21 @@ function ContinueCard({ nextLesson, levels }) {
                 : "Your next lesson is ready."}
             </p>
             <Link to={`/learn/${nextLesson.id}`} className="btn btn-primary">
-              Continue learning →
+              Continue learning <Icon name="arrow-right" size={18} />
             </Link>
           </>
         ) : (
           <>
             <span className="badge">All done</span>
-            <h2>🏆 You finished A1 and A2!</h2>
+            <h2 className="continue-title">
+              <span className="icon-tile">
+                <Icon name="trophy" size={22} />
+              </span>
+              You finished A1 and A2!
+            </h2>
             <p>Keep your words fresh with flashcards.</p>
             <Link to="/flashcards" className="btn btn-primary">
-              Practice flashcards →
+              Practice flashcards <Icon name="arrow-right" size={18} />
             </Link>
           </>
         )}
@@ -130,10 +139,10 @@ function Home() {
   );
 
   const stats = data && [
-    { label: "Day streak", value: data.streak, icon: "🔥" },
-    { label: "Total XP", value: data.totalXp, icon: "⚡" },
-    { label: `${language.label} words learned`, value: data.wordsLearned, icon: "📚" },
-    { label: "Flashcards reviewed", value: data.flashcardsReviewed, icon: "🃏" },
+    { label: "Day streak", value: data.streak, icon: "flame" },
+    { label: "Total XP", value: data.totalXp, icon: "bolt" },
+    { label: `${language.label} words learned`, value: data.wordsLearned, icon: "book" },
+    { label: "Flashcards reviewed", value: data.flashcardsReviewed, icon: "cards" },
   ];
 
   return (
@@ -141,10 +150,11 @@ function Home() {
       <header className="page-header">
         <div>
           <h1>
-            {greeting()}, {user?.username}! 👋
+            {greeting()}, {user?.username}!
           </h1>
           <p>
-            You're learning {language.flag} {language.label}. Ready for today's practice?
+            You're learning <LanguageMark code={language.code} size="sm" className="lang-mark-inline" />{" "}
+            {language.label}. Ready for today's practice?
           </p>
         </div>
       </header>
@@ -166,8 +176,8 @@ function Home() {
           <div className="stats-grid">
             {stats.map((stat) => (
               <div key={stat.label} className="card stat-card">
-                <span className="stat-icon" aria-hidden="true">
-                  {stat.icon}
+                <span className="icon-tile stat-icon">
+                  <Icon name={stat.icon} size={20} />
                 </span>
                 <span className="stat-value">{stat.value}</span>
                 <span className="stat-label">{stat.label}</span>
@@ -188,8 +198,8 @@ function Home() {
                 <ul className="activity-list">
                   {data.recentSessions.map((s) => (
                     <li key={s.id}>
-                      <span className="activity-icon" aria-hidden="true">
-                        {s.icon}
+                      <span className="icon-tile icon-tile-sm">
+                        <Icon name={s.icon} size={16} />
                       </span>
                       <span className="activity-main">
                         {s.category}
@@ -220,7 +230,7 @@ function Home() {
                 <div className="favorites-strip">
                   {data.recentFavorites.map((f) => (
                     <div key={f.id} className="favorite-chip">
-                      <span aria-hidden="true">{getLanguage(f.language).flag}</span>
+                      <LanguageMark code={f.language} size="sm" />
                       <strong>{f.word}</strong>
                       <span>{f.translation}</span>
                     </div>
