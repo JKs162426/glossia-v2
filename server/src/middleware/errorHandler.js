@@ -3,8 +3,8 @@ export const notFound = (req, res) => {
   res.status(404).json({ message: "Route not found" });
 };
 
-// eslint-disable-next-line no-unused-vars
-export const errorHandler = (err, req, res, next) => {
+// Express recognizes an error handler by its 4 parameters, so `_next` stays.
+export const errorHandler = (err, req, res, _next) => {
   if (err.type === "entity.parse.failed") {
     return res.status(400).json({ message: "Invalid JSON body" });
   }
