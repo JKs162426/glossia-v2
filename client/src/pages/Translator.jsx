@@ -8,6 +8,7 @@ import { Icon } from "../components/Icon";
 import "./Translator.css";
 
 const MAX_CHARS = 500; // MyMemory's limit per request
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
 async function fetchTranslation(text, source, target, signal) {
   const params = new URLSearchParams({ q: text, langpair: `${source}|${target}` });
@@ -236,7 +237,7 @@ function Translator() {
             disabled={!text.trim() || sameLanguages || loading}
           >
             {loading ? "Translating…" : "Translate"}
-            <kbd className="shortcut">⌘↵</kbd>
+            <kbd className="shortcut">{IS_MAC ? "⌘ Enter" : "Ctrl Enter"}</kbd>
           </button>
           <button
             className="btn btn-secondary"
