@@ -25,10 +25,12 @@ export const cookieStateStore = {
     const expected = req.cookies?.[COOKIE];
     req.res.clearCookie(COOKIE, cookieOptions);
 
+    // timingSafeEqual throws unless both buffers have the same *byte* length,
+    // which differs from the string length for characters like "é".
     const valid =
       typeof state === "string" &&
       typeof expected === "string" &&
-      state.length === expected.length &&
+      Buffer.byteLength(state) === Buffer.byteLength(expected) &&
       crypto.timingSafeEqual(Buffer.from(state), Buffer.from(expected));
 
     if (!valid) {
