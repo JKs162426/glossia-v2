@@ -13,8 +13,7 @@ import {
   recordWordResults,
   addXp,
 } from "../models/progressModel.js";
-
-const starsFor = (score) => (score >= 90 ? 3 : score >= 70 ? 2 : 1);
+import { starsFor, xpFor } from "../services/scoringService.js";
 
 // Loads the node and refuses access while it's still locked for this user.
 const loadPlayableNode = async (userId, lessonId, language) => {
@@ -74,8 +73,7 @@ export const completeLesson = async (req, res) => {
   const score = Math.round((correct / total) * 100);
   const stars = starsFor(score);
   const firstCompletion = status !== "completed";
-  const baseXp = node.type === "checkpoint" ? 20 : 10;
-  const xp = (firstCompletion ? baseXp : 5) + (score === 100 ? 5 : 0);
+  const xp = xpFor({ type: node.type, firstCompletion, score });
 
   await saveLessonResult(req.user.id, language, node.id, score, stars);
   await recordWordResults(
