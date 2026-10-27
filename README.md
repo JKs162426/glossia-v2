@@ -88,8 +88,14 @@ npm test
 npm run lint
 ```
 
-- **Unit** (`server/tests/unit`, `client/src/**/*.test.jsx`): logic and
-  components, no database.
+- **Unit** (`server/tests/unit`, `client/src/**/*.test.{js,jsx}`): logic and
+  components, no database. They cover:
+  - path unlocking (A2 stays locked until A1 is done) and no repeated word per level;
+  - stars, XP, the streak and the 7-day chart;
+  - the Google OAuth `state` check and the JWT (HS256 only, expired or edited
+    tokens rejected, httpOnly cookie);
+  - typed-answer checking (articles, accents, case, `l'`) and exercise building
+    (12 per lesson, 11 per checkpoint, 4 different options).
 - **Integration** (`server/tests/integration`): the real API against a MySQL
   test database. Before the run, `globalSetup.js` creates the database and
   applies every migration, exactly like production.
@@ -108,7 +114,8 @@ server/
   src/app.js           Builds the Express app (exported, used by tests)
   src/server.js        Entry point: opens the port
   src/routes/ → controllers/ → models/   Request path, layer by layer
-  src/services/        Curriculum logic (path order, unlocking)
+  src/services/        Pure logic: curriculum (path order, unlocking),
+                       scoring (stars, XP), activity (streak, week)
   src/data/            Lesson content in all 8 languages
   src/db/              Migration runner (npm run migrate)
   db/migrations/       Versioned SQL schema and seed data
@@ -121,6 +128,8 @@ server/
 | --- | --- |
 | Learning path content (A1/A2, every language) | `server/src/data/curriculum.js` |
 | Path order, unlocking, lesson ids | `server/src/services/curriculumService.js` |
+| Stars and XP for a finished lesson | `server/src/services/scoringService.js` |
+| Streak and the 7-day XP chart | `server/src/services/activityService.js` |
 | Exercise generation & answer checking | `client/src/lib/exercises.js` |
 | Database migrations | `server/db/migrations/*.sql` (`npm run migrate`) |
 | Supported languages | `server/src/config/languages.js` + `client/src/lib/languages.js` (keep in sync) |
