@@ -95,10 +95,22 @@ npm run lint
   - the Google OAuth `state` check and the JWT (HS256 only, expired or edited
     tokens rejected, httpOnly cookie);
   - typed-answer checking (articles, accents, case, `l'`) and exercise building
-    (12 per lesson, 11 per checkpoint, 4 different options).
+    (12 per lesson, 11 per checkpoint, 4 different options);
+  - bad requests: invalid JSON → 400 and bodies over 20 KB → 413, with no
+    internal details in any error response.
 - **Integration** (`server/tests/integration`): the real API against a MySQL
   test database. Before the run, `globalSetup.js` creates the database and
-  applies every migration, exactly like production.
+  applies every migration, exactly like production. They cover:
+  - register and login (httpOnly cookie, weak password → 400, repeated email
+    → 409, the same message for a wrong password or an unknown email, the 11th
+    failed login → 429), `/me` and logout;
+  - authorization: another user's favorites can't be listed or deleted (404),
+    locked lessons answer 403;
+  - completing a lesson saves the best score, stars and XP and unlocks the next one.
+- Each integration test cleans up after itself: `tests/integration/setup.js`
+  deletes the users it created (emails on `tests.glossia.dev`), and their data
+  goes with them through `ON DELETE CASCADE`. `helpers.js` has
+  `createTestUser()`, which returns a user with a ready session cookie.
 - With `NODE_ENV=test` the server reads **only** `server/.env.test` and refuses
   any database whose name doesn't end in `_test`, so tests can't touch real data.
 
