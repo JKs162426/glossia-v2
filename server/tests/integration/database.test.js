@@ -1,4 +1,4 @@
-import { describe, it, expect, afterAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import pool from "../../src/config/db.js";
@@ -8,8 +8,6 @@ const migrationFiles = fs
   .filter((f) => f.endsWith(".sql"));
 
 describe("test database", () => {
-  afterAll(() => pool.end());
-
   it("is a *_test database", async () => {
     const [[{ db }]] = await pool.query("SELECT DATABASE() AS db");
     expect(db).toMatch(/_test$/);
