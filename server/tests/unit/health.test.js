@@ -20,5 +20,6 @@ describe("API smoke test", () => {
     expect(res.headers["x-powered-by"]).toBeUndefined();
     expect(res.headers["x-content-type-options"]).toBe("nosniff");
     expect(res.headers["content-security-policy"]).toContain("default-src 'self'");
+    expect(res.headers["strict-transport-security"]).toMatch(/max-age=\d+/);
   });
 });
