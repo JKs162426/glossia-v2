@@ -208,6 +208,38 @@
 .option.matched {
   opacity: 0.35;
   border-color: var(--success);
+  animation: match-out 0.4s ease;
+}
+
+/* ---- Answer feedback ---- */
+
+/* Right answer: the chosen option swells. Wrong one: it shakes (above),
+   then the right option swells so the eye goes to it. */
+.answered-right .option.correct {
+  animation: bump 0.35s ease;
+}
+
+.answered-wrong .option.correct {
+  animation: bump 0.4s 0.3s ease;
+}
+
+.lesson-footer.correct .feedback-text,
+.lesson-footer.wrong .feedback-text {
+  animation: rise 0.25s ease-out both;
+}
+
+.lesson-footer.wrong .feedback-title {
+  animation: shake 0.35s 0.1s ease;
+}
+
+.combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: var(--gold);
+  font-weight: 600;
+  animation: pop 0.4s 0.15s ease both;
 }
 
 /* ---- Footer ---- */
@@ -283,9 +315,28 @@
   animation: fade-in 0.3s ease;
 }
 
+.results-trophy-wrap {
+  position: relative;
+}
+
 .results-trophy {
   animation: pop 0.5s ease;
   box-shadow: 0 0 0 10px rgba(0, 212, 255, 0.08);
+}
+
+.results-sparkle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -10px;
+  color: var(--gold);
+  pointer-events: none;
+  animation: sparkle-burst 1s ease-out both;
+  animation-delay: calc(0.35s + var(--n) * 0.06s);
+}
+
+.lesson-results .alert-success {
+  animation: pop 0.45s 0.5s ease both;
 }
 
 .results-stars {
@@ -338,17 +389,37 @@
   }
 }
 
-@keyframes pop {
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* A matched pair swells, then fades to its dimmed "done" look. */
+@keyframes match-out {
   0% {
-    transform: scale(0.4);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+/* Each sparkle reaches full size early, then drifts out and fades. */
+@keyframes sparkle-burst {
+  0% {
+    transform: rotate(var(--angle)) translateY(-30px) scale(0);
     opacity: 0;
   }
-  70% {
-    transform: scale(1.15);
+  35% {
+    transform: rotate(var(--angle)) translateY(-62px) scale(1.1);
+    opacity: 1;
   }
   100% {
-    transform: scale(1);
-    opacity: 1;
+    transform: rotate(var(--angle)) translateY(-84px) scale(0.7);
+    opacity: 0;
   }
 }
 

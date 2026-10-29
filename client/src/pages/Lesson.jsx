@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../context/language-context";
 import { useApi } from "../hooks/useApi";
+import { useCountUp } from "../hooks/useCountUp";
 import api from "../services/api";
 import { getLanguage } from "../lib/languages";
 import { buildExercises, checkTyped } from "../lib/exercises";
@@ -9,6 +10,7 @@ import { canSpeak, speak } from "../lib/speech";
 import { errorMessage, shuffle } from "../lib/utils";
 import Loader from "../components/Loader";
 import { Icon } from "../components/Icon";
+import { SpeakerIcon } from "../components/SpeakerIcon";
 import "./Lesson.css";
 
 function SpeakButton({ text, language, large = false }) {
@@ -21,7 +23,7 @@ function SpeakButton({ text, language, large = false }) {
       aria-label="Listen"
       title="Listen"
     >
-      <Icon name="speaker" size={large ? 44 : 22} />
+      <SpeakerIcon text={text} size={large ? 44 : 22} />
     </button>
   );
 }
@@ -98,13 +100,28 @@ function MatchExercise({ pairs, language, onDone }) {
 
 function Results({ lesson, result, saving, saveError, onRetrySave, accuracy }) {
   const navigate = useNavigate();
+  const shownAccuracy = useCountUp(accuracy);
+  const shownXp = useCountUp(result?.xp ?? 0);
 
   if (saving) return <Loader label="Saving your progress…" fullscreen />;
 
   return (
     <div className="lesson-results">
-      <div className="icon-tile icon-tile-xl results-trophy">
-        <Icon name={lesson.type === "checkpoint" ? "trophy" : "sparkles"} size={44} />
+      <div className="results-trophy-wrap">
+        <div className="icon-tile icon-tile-xl results-trophy">
+          <Icon name={lesson.type === "checkpoint" ? "trophy" : "sparkles"} size={44} />
+        </div>
+        {/* A perfect score bursts a ring of sparkles around the trophy. */}
+        {result && accuracy === 100 &&
+          [0, 1, 2, 3, 4, 5].map((n) => (
+            <Icon
+              key={n}
+              name="sparkles"
+              size={20}
+              className="results-sparkle"
+              style={{ "--angle": `${n * 60}deg`, "--n": n }}
+            />
+          ))}
       </div>
       <h1>{lesson.type === "checkpoint" ? "Checkpoint passed!" : "Lesson complete!"}</h1>
       {result?.levelCompleted && (
@@ -128,11 +145,11 @@ function Results({ lesson, result, saving, saveError, onRetrySave, accuracy }) {
 
       <div className="results-stats">
         <div className="card">
-          <span className="results-value">{accuracy}%</span>
+          <span className="results-value">{shownAccuracy}%</span>
           <span>Accuracy</span>
         </div>
         <div className="card">
-          <span className="results-value">+{result?.xp ?? 0}</span>
+          <span className="results-value">+{shownXp}</span>
           <span>XP earned</span>
         </div>
       </div>
@@ -156,7 +173,12 @@ function Results({ lesson, result, saving, saveError, onRetrySave, accuracy }) {
             Next lesson <Icon name="arrow-right" size={18} />
           </button>
         )}
-        <Link to="/learn" className="btn btn-secondary btn-block">
+        {/* After a first completion the path animates the unlock (Learn.jsx). */}
+        <Link
+          to="/learn"
+          state={result?.firstCompletion ? { justCompleted: lesson.id } : undefined}
+          className="btn btn-secondary btn-block"
+        >
           Back to path
         </Link>
       </div>
@@ -176,6 +198,7 @@ function LessonRunner({ lesson }) {
   const [selected, setSelected] = useState(null);
   const [typed, setTyped] = useState("");
   const [feedback, setFeedback] = useState(null);
+  const [combo, setCombo] = useState(0); // right answers in a row
   const [finished, setFinished] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -213,7 +236,9 @@ function LessonRunner({ lesson }) {
   );
 
   const registerAnswer = (correct, note = null) => {
-    setFeedback({ correct, note });
+    const nextCombo = correct ? combo + 1 : 0;
+    setCombo(nextCombo);
+    setFeedback({ correct, note, combo: nextCombo });
     if (correct) {
       setSolved((n) => n + 1);
       if (exercise.card) speak(exercise.card.term, lesson.language);
@@ -237,9 +262,12 @@ function LessonRunner({ lesson }) {
   const handleMatchDone = (perfect, count) => {
     if (!perfect) setMistakes((prev) => new Set(prev).add(exercise.id));
     setSolved((n) => n + 1);
+    const nextCombo = perfect ? combo + 1 : 0;
+    setCombo(nextCombo);
     setFeedback({
       correct: true,
       note: perfect ? null : `${count} mismatch${count === 1 ? "" : "es"} — keep practicing these.`,
+      combo: nextCombo,
     });
   };
 
@@ -349,7 +377,9 @@ function LessonRunner({ lesson }) {
         )}
 
         {exercise.options && (
-          <div className="options">
+          <div
+            className={`options ${feedback ? (feedback.correct ? "answered-right" : "answered-wrong") : ""}`}
+          >
             {exercise.options.map((option, i) => {
               let state = selected === option ? "selected" : "";
               if (feedback && option === exercise.answer) state = "correct";
@@ -395,9 +425,19 @@ function LessonRunner({ lesson }) {
             {feedback && (
               <>
                 <strong className="feedback-title">
-                  <Icon name={feedback.correct ? "check" : "close"} size={22} />
+                  <Icon
+                    name={feedback.correct ? "check" : "close"}
+                    size={22}
+                    className={feedback.correct ? "icon-draw" : ""}
+                  />
                   {feedback.correct ? "Correct!" : "Not quite"}
                 </strong>
+                {feedback.correct && feedback.combo >= 5 && feedback.combo % 5 === 0 && (
+                  <span className="combo">
+                    <Icon name="flame" size={16} className="icon-flicker" />
+                    {feedback.combo} in a row!
+                  </span>
+                )}
                 {!feedback.correct && exercise.card && (
                   <span>
                     Answer: {exercise.answer}
