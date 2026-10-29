@@ -5,6 +5,7 @@ import { useLanguage } from "../context/language-context";
 import { LANGUAGES, baseLanguageFor, getLanguage } from "../lib/languages";
 import { canSpeak, speak } from "../lib/speech";
 import { Icon } from "../components/Icon";
+import { SpeakerIcon } from "../components/SpeakerIcon";
 import "./Translator.css";
 
 const MAX_CHARS = 500; // MyMemory's limit per request
@@ -46,6 +47,7 @@ function Translator() {
   const [loading, setLoading] = useState(false);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | exists | error
   const [copied, setCopied] = useState(false);
+  const [swapTurns, setSwapTurns] = useState(0); // the swap icon turns half a circle per click
   const controllerRef = useRef(null);
 
   const isStale =
@@ -83,6 +85,7 @@ function Translator() {
   };
 
   const swapLanguages = () => {
+    setSwapTurns((turns) => turns + 1);
     setSourceLang(targetLang);
     setTargetLang(sourceLang);
     if (result && !isStale) {
@@ -128,7 +131,7 @@ function Translator() {
   const [saveIcon, saveText] = {
     idle: ["star", "Save to favorites"],
     saving: ["star", "Saving…"],
-    saved: ["check", "Saved!"],
+    saved: ["star", "Saved!"],
     exists: ["star", "Already saved"],
     error: ["close", "Couldn't save — retry"],
   }[saveState];
@@ -164,7 +167,7 @@ function Translator() {
             aria-label="Swap languages"
             title="Swap languages"
           >
-            <Icon name="swap" />
+            <Icon name="swap" className="swap-icon" style={{ transform: `rotate(${swapTurns * 180}deg)` }} />
           </button>
           {languageSelect("target-lang", targetLang, setTargetLang, "Translate to")}
         </div>
@@ -183,7 +186,7 @@ function Translator() {
             <div className="panel-footer">
               {canSpeak && text && (
                 <button className="icon-btn" onClick={() => speak(text, sourceLang)} aria-label="Listen to the source text">
-                  <Icon name="speaker" size={18} />
+                  <SpeakerIcon text={text} size={18} />
                 </button>
               )}
               {text && (
@@ -198,13 +201,22 @@ function Translator() {
           </div>
 
           <div className={`panel result ${isStale ? "stale" : ""}`} aria-live="polite">
-            <p className={result ? "result-text" : "placeholder"} lang={targetLang}>
-              {loading
-                ? "Translating…"
-                : error
-                  ? ""
-                  : result?.translated || "Translation will appear here"}
-            </p>
+            {loading ? (
+              <div className="result-loading">
+                <span className="sr-only">Translating…</span>
+                <span className="skeleton" />
+                <span className="skeleton short" />
+              </div>
+            ) : (
+              // key: a new translation fades in instead of replacing the old one in place
+              <p
+                key={result?.translated}
+                className={result ? "result-text" : "placeholder"}
+                lang={targetLang}
+              >
+                {error ? "" : result?.translated || "Translation will appear here"}
+              </p>
+            )}
             {error && <p className="alert alert-error">{error}</p>}
             {result && !loading && (
               <div className="panel-footer">
@@ -214,11 +226,11 @@ function Translator() {
                     onClick={() => speak(result.translated, result.target)}
                     aria-label="Listen to the translation"
                   >
-                    <Icon name="speaker" size={18} />
+                    <SpeakerIcon text={result.translated} size={18} />
                   </button>
                 )}
                 <button className="icon-btn" onClick={copy} aria-label="Copy translation">
-                  <Icon name={copied ? "check" : "copy"} size={18} />
+                  <Icon name={copied ? "check" : "copy"} size={18} className={copied ? "icon-draw" : ""} />
                 </button>
                 {isStale && <span className="stale-note">Text changed — translate again</span>}
               </div>
@@ -244,7 +256,12 @@ function Translator() {
             onClick={saveFavorite}
             disabled={!result || isStale || ["saving", "saved", "exists"].includes(saveState)}
           >
-            <Icon name={saveIcon} size={18} filled={saveState === "exists"} />
+            <Icon
+              name={saveIcon}
+              size={18}
+              filled={saveState === "saved" || saveState === "exists"}
+              className={saveState === "saved" ? "icon-pop saved-star" : ""}
+            />
             {saveText}
           </button>
         </div>

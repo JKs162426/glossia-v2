@@ -1,8 +1,10 @@
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import { useLanguage } from "../context/language-context";
 import { useApi } from "../hooks/useApi";
 import { getLanguage } from "../lib/languages";
+import { rememberStreak, streakIncrease } from "../lib/streakMemory";
 import Loader from "../components/Loader";
 import { Icon, LanguageMark } from "../components/Icon";
 import "./Home.css";
@@ -48,7 +50,7 @@ function WeeklyChart({ week }) {
                 </span>
                 <div
                   className={`week-bar ${d.xp === 0 ? "empty" : ""}`}
-                  style={{ height: d.xp ? `${(d.xp / max) * 100}%` : undefined }}
+                  style={{ height: d.xp ? `${(d.xp / max) * 100}%` : undefined, "--i": i }}
                 />
               </div>
               <span className={`week-label ${isToday ? "today" : ""}`}>
@@ -138,8 +140,18 @@ function Home() {
     `/stats/overview?language=${targetLanguage}`,
   );
 
+  // "+1" next to the streak, only on the first visit after it went up.
+  const userId = user?.id;
+  const streakGain = useMemo(
+    () => (data && userId ? streakIncrease(userId, data.streak) : 0),
+    [data, userId],
+  );
+  useEffect(() => {
+    if (data && userId) rememberStreak(userId, data.streak);
+  }, [data, userId]);
+
   const stats = data && [
-    { label: "Day streak", value: data.streak, icon: "flame" },
+    { label: "Day streak", value: data.streak, icon: "flame", gain: streakGain },
     { label: "Total XP", value: data.totalXp, icon: "bolt" },
     { label: `${language.label} words learned`, value: data.wordsLearned, icon: "book" },
     { label: "Flashcards reviewed", value: data.flashcardsReviewed, icon: "cards" },
@@ -177,9 +189,16 @@ function Home() {
             {stats.map((stat) => (
               <div key={stat.label} className="card stat-card">
                 <span className="icon-tile stat-icon">
-                  <Icon name={stat.icon} size={20} />
+                  <Icon
+                    name={stat.icon}
+                    size={20}
+                    className={stat.icon === "flame" && stat.value > 0 ? "icon-flicker" : ""}
+                  />
                 </span>
-                <span className="stat-value">{stat.value}</span>
+                <span className="stat-value">
+                  {stat.value}
+                  {stat.gain > 0 && <span className="stat-gain">+{stat.gain}</span>}
+                </span>
                 <span className="stat-label">{stat.label}</span>
               </div>
             ))}

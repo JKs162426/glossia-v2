@@ -30,12 +30,56 @@
 
 /* ---- 3D flip card ---- */
 
+/* Holds the current card and, on top, the one flying out after an answer. */
+.flashcard-stage {
+  position: relative;
+  margin-bottom: 20px;
+}
+
 .flashcard {
   perspective: 1200px;
   height: 300px;
   cursor: pointer;
-  margin-bottom: 20px;
   border-radius: var(--radius-xl);
+  animation: card-in 0.3s ease-out;
+}
+
+.flashcard-leaving {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  animation: card-out-right 0.45s ease-in forwards;
+}
+
+.flashcard-leaving.missed {
+  animation-name: card-out-left;
+}
+
+/* The copy shows the answer side facing forward. */
+.flashcard-leaving .flashcard-face {
+  transform: none;
+}
+
+@keyframes card-in {
+  from {
+    transform: scale(0.94);
+    opacity: 0.4;
+  }
+}
+
+@keyframes card-out-right {
+  to {
+    transform: translateX(70%) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes card-out-left {
+  to {
+    transform: translateX(-70%) rotate(-10deg);
+    opacity: 0;
+  }
 }
 
 .flashcard-inner {
@@ -115,6 +159,10 @@
   gap: 16px;
   text-align: center;
   padding: 36px 28px;
+}
+
+.results-emoji {
+  animation: pop 0.5s ease;
 }
 
 .deck-title {

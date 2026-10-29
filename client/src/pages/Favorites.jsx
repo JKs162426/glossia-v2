@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import { useLanguage } from "../context/language-context";
@@ -7,6 +8,7 @@ import { getLanguage } from "../lib/languages";
 import { canSpeak, speak } from "../lib/speech";
 import Loader from "../components/Loader";
 import { Icon, LanguageMark } from "../components/Icon";
+import { SpeakerIcon } from "../components/SpeakerIcon";
 import "./Favorites.css";
 
 function Favorites() {
@@ -18,7 +20,14 @@ function Favorites() {
 
   const deleteFavorite = async (favorite) => {
     setDeleteError("");
-    setData((list) => list.filter((f) => f.id !== favorite.id)); // optimistic
+    const remove = () => setData((list) => list.filter((f) => f.id !== favorite.id)); // optimistic
+    // Where the browser supports it, the card fades out and the others slide
+    // into its place (each card has a view-transition-name); elsewhere it's instant.
+    if (document.startViewTransition) {
+      document.startViewTransition(() => flushSync(remove));
+    } else {
+      remove();
+    }
     try {
       await api.delete(`/favorites/${favorite.id}`);
     } catch {
@@ -110,7 +119,11 @@ function Favorites() {
               {visible.map((fav) => {
                 const lang = getLanguage(fav.language);
                 return (
-                  <article key={fav.id} className="card card-interactive favorite-card">
+                  <article
+                    key={fav.id}
+                    className="card card-interactive favorite-card"
+                    style={{ viewTransitionName: `favorite-${fav.id}` }}
+                  >
                     <span className="favorite-lang">
                       <LanguageMark code={lang.code} size="sm" /> {lang.label}
                     </span>
@@ -123,7 +136,7 @@ function Favorites() {
                           onClick={() => speak(fav.word, fav.language)}
                           aria-label={`Listen to ${fav.word}`}
                         >
-                          <Icon name="speaker" size={18} />
+                          <SpeakerIcon text={fav.word} size={18} />
                         </button>
                       )}
                       <button

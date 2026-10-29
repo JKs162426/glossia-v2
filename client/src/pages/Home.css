@@ -91,6 +91,31 @@
   font-size: 13px;
 }
 
+/* "+1" that floats up next to the streak and fades away. */
+.stat-gain {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 16px;
+  color: var(--gold);
+  animation: gain-float 1.8s 0.4s ease-out both;
+}
+
+@keyframes gain-float {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  20%,
+  75% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
 /* ---- Sections ---- */
 
 .dashboard-sections {
@@ -155,6 +180,19 @@
   background-color: var(--accent-cyan);
   border-radius: 4px 4px 0 0;
   transition: height 0.4s ease;
+}
+
+/* The bars grow from the axis one after another when the chart appears. */
+.week-bar:not(.empty) {
+  transform-origin: bottom;
+  animation: grow-y 0.5s ease-out both;
+  animation-delay: calc(var(--i) * 50ms);
+}
+
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
 }
 
 .week-bar.empty {

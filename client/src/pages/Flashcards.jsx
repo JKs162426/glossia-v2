@@ -8,6 +8,7 @@ import { canSpeak, speak } from "../lib/speech";
 import { shuffle } from "../lib/utils";
 import Loader from "../components/Loader";
 import { Icon, LanguageMark } from "../components/Icon";
+import { SpeakerIcon } from "../components/SpeakerIcon";
 import "./Flashcards.css";
 
 // Normalizes both deck sources to { id, term, meaning }:
@@ -37,6 +38,8 @@ function DeckSession({ deck, language }) {
   const [results, setResults] = useState([]);
   const [showTermFirst, setShowTermFirst] = useState(true);
   const [xp, setXp] = useState(null);
+  // The card just answered, flying out left ("still learning") or right ("got it").
+  const [leaving, setLeaving] = useState(null);
 
   const finished = index >= cards.length;
   const card = cards[index];
@@ -54,6 +57,7 @@ function DeckSession({ deck, language }) {
       if (!flipped || finished) return;
       const nextResults = [...results, { ...card, correct }];
       setResults(nextResults);
+      setLeaving({ id: index, card, correct });
       setFlipped(false);
       setIndex((i) => i + 1);
 
@@ -68,7 +72,7 @@ function DeckSession({ deck, language }) {
           .catch(() => setXp(0));
       }
     },
-    [flipped, finished, results, card, cards.length, language, deck.categoryId],
+    [flipped, finished, results, card, index, cards.length, language, deck.categoryId],
   );
 
   const restart = (subset) => {
@@ -77,6 +81,7 @@ function DeckSession({ deck, language }) {
     setFlipped(false);
     setResults([]);
     setXp(null);
+    setLeaving(null);
   };
 
   useEffect(() => {
@@ -178,26 +183,42 @@ function DeckSession({ deck, language }) {
         </button>
       </div>
 
-      {/* key: a fresh element per card, so the flip-back animation can't
-          briefly reveal the next card's answer */}
-      <div
-        key={index}
-        className={`flashcard ${flipped ? "flipped" : ""}`}
-        onClick={flip}
-        role="button"
-        tabIndex={0}
-        aria-label={flipped ? `Answer: ${back.text}` : `${front.text}. Press space to reveal`}
-      >
-        <div className="flashcard-inner">
-          <div className="flashcard-face flashcard-front">
-            <span className="badge">{front.lang.label}</span>
-            <h2>{front.text}</h2>
-            <span className="card-hint">Tap or press Space to reveal</span>
+      <div className="flashcard-stage">
+        {leaving && (
+          <div
+            key={leaving.id}
+            className={`flashcard-leaving ${leaving.correct ? "known" : "missed"}`}
+            onAnimationEnd={() => setLeaving(null)}
+            aria-hidden="true"
+          >
+            <div className="flashcard-face flashcard-back">
+              <span className="badge">{back.lang.label}</span>
+              <h2>{showTermFirst ? leaving.card.meaning : leaving.card.term}</h2>
+            </div>
           </div>
-          <div className="flashcard-face flashcard-back">
-            <span className="badge">{back.lang.label}</span>
-            <h2>{back.text}</h2>
-            <span className="card-hint">Did you know it?</span>
+        )}
+
+        {/* key: a fresh element per card, so the flip-back animation can't
+            briefly reveal the next card's answer */}
+        <div
+          key={index}
+          className={`flashcard ${flipped ? "flipped" : ""}`}
+          onClick={flip}
+          role="button"
+          tabIndex={0}
+          aria-label={flipped ? `Answer: ${back.text}` : `${front.text}. Press space to reveal`}
+        >
+          <div className="flashcard-inner">
+            <div className="flashcard-face flashcard-front">
+              <span className="badge">{front.lang.label}</span>
+              <h2>{front.text}</h2>
+              <span className="card-hint">Tap or press Space to reveal</span>
+            </div>
+            <div className="flashcard-face flashcard-back">
+              <span className="badge">{back.lang.label}</span>
+              <h2>{back.text}</h2>
+              <span className="card-hint">Did you know it?</span>
+            </div>
           </div>
         </div>
       </div>
@@ -209,7 +230,7 @@ function DeckSession({ deck, language }) {
             onClick={() => speak(card.term, language)}
             aria-label={`Listen to ${card.term}`}
           >
-            <Icon name="speaker" />
+            <SpeakerIcon text={card.term} />
           </button>
         )}
         <button className="btn btn-error" onClick={() => answer(false)} disabled={!flipped}>
