@@ -15,6 +15,9 @@ the first load can take up to a minute while the server wakes up.
 - **Translator** powered by the [MyMemory](https://mymemory.translated.net) API
 - **Favorites** — save words and phrases to review later
 - **Accounts** with email/password or Google sign-in
+- **Animations with a purpose**: unlocking the next lesson, right and wrong
+  answers, rewards and the streak. All of them stop with the system's
+  "reduce motion" setting.
 
 ## Stack
 
@@ -97,7 +100,10 @@ npm run lint
   - typed-answer checking (articles, accents, case, `l'`) and exercise building
     (12 per lesson, 11 per checkpoint, 4 different options);
   - bad requests: invalid JSON → 400 and bodies over 20 KB → 413, with no
-    internal details in any error response.
+    internal details in any error response;
+  - animations: which nodes the path celebrates after a lesson (and that a
+    reload doesn't replay it), the speaker icon while a word is spoken, the
+    count-up and the streak "+1".
 - **Integration** (`server/tests/integration`): the real API against a MySQL
   test database. Before the run, `globalSetup.js` creates the database and
   applies every migration, exactly like production. They cover:
@@ -120,7 +126,9 @@ npm run lint
 client/                React app (Vite)
   src/pages/           One component per screen (Home, Learn, Lesson, …)
   src/components/      Shared UI: Sidebar, Icon (own SVG set), AuthShell…
-  src/lib/             Pure logic: exercises, languages, icons, speech
+  src/lib/             Pure logic: exercises, languages, icons, speech,
+                       path celebrations, streak memory
+  src/hooks/           useApi (GET a path), useCountUp (animated numbers)
   src/test/setup.js    Test setup (DOM matchers)
 server/
   src/app.js           Builds the Express app (exported, used by tests)
@@ -143,6 +151,7 @@ server/
 | Stars and XP for a finished lesson | `server/src/services/scoringService.js` |
 | Streak and the 7-day XP chart | `server/src/services/activityService.js` |
 | Exercise generation & answer checking | `client/src/lib/exercises.js` |
+| Animations | Shared keyframes and the reduce-motion rule in `client/src/index.css`, icon animations in `components/Icon.css`, the rest in each page's CSS. `lib/path.js` decides what the path celebrates. |
 | Database migrations | `server/db/migrations/*.sql` (`npm run migrate`) |
 | Supported languages | `server/src/config/languages.js` + `client/src/lib/languages.js` (keep in sync) |
 
