@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import LanguageSelector from "./LanguageSelector";
 import { Icon } from "./Icon";
@@ -12,8 +12,18 @@ const navItems = [
   { path: "/favorites", label: "Favorites", icon: "star" },
 ];
 
+// Position of the current page in the nav (-1 if none), matched like NavLink.
+const activeIndex = (pathname) =>
+  navItems.findIndex((item) =>
+    item.path === "/"
+      ? pathname === "/"
+      : pathname === item.path || pathname.startsWith(`${item.path}/`),
+  );
+
 function Sidebar() {
   const { user, logout } = useAuth();
+  const { pathname } = useLocation();
+  const active = activeIndex(pathname);
   const initial = (user?.username || "?").charAt(0).toUpperCase();
 
   return (
@@ -45,7 +55,13 @@ function Sidebar() {
           <LanguageSelector />
         </div>
 
-        <nav className="sidebar-nav" aria-label="Main">
+        <nav
+          className="sidebar-nav"
+          aria-label="Main"
+          style={{ "--active": active, "--count": navItems.length }}
+        >
+          {/* One marker for the whole nav, so it can slide to the current page. */}
+          {active >= 0 && <span className="nav-indicator" aria-hidden="true" />}
           {navItems.map((item) => (
             <NavLink
               key={item.path}

@@ -41,6 +41,7 @@
 }
 
 .sidebar-nav {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -51,6 +52,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  /* Fixed height: the indicator moves by (height + gap) per item. */
+  height: 44px;
   padding: 11px 14px;
   border-radius: var(--radius);
   color: var(--text-secondary);
@@ -72,15 +75,17 @@
   color: var(--accent-cyan);
 }
 
-.nav-item.active::before {
-  content: "";
+.nav-indicator {
   position: absolute;
-  left: 0;
   top: 10px;
-  bottom: 10px;
+  left: 0;
+  z-index: 1;
   width: 3px;
+  height: 24px;
   border-radius: 0 3px 3px 0;
   background: var(--accent-cyan);
+  transform: translateY(calc(var(--active) * 48px));
+  transition: transform 0.25s ease;
 }
 
 .nav-icon {
@@ -215,6 +220,7 @@
     flex-direction: column;
     justify-content: center;
     gap: 2px;
+    height: auto;
     padding: 6px 4px;
     font-size: 10px;
     border-radius: 0;
@@ -225,14 +231,23 @@
     background: transparent;
   }
 
-  .nav-item.active::before {
+  /* Bottom bar: the items share the width equally, so the marker moves by
+     its own width (one item) per step. */
+  .nav-indicator {
     top: 0;
-    bottom: auto;
-    left: 25%;
-    right: 25%;
-    width: auto;
+    width: calc(100% / var(--count));
     height: 3px;
+    border-radius: 0;
+    background: none;
+    transform: translateX(calc(var(--active) * 100%));
+  }
+
+  .nav-indicator::after {
+    content: "";
+    position: absolute;
+    inset: 0 25%;
     border-radius: 0 0 3px 3px;
+    background: var(--accent-cyan);
   }
 
   .nav-icon {
