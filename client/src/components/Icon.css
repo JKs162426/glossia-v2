@@ -47,6 +47,54 @@
   margin: 0 2px;
 }
 
+/* ---- Icon animations: only for icons that show a change of state ---- */
+
+/* The stroke draws itself, e.g. the check after a right answer. */
+.icon-draw path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: icon-draw 0.35s 0.05s ease-out forwards;
+}
+
+.icon-pop {
+  animation: pop 0.4s ease both;
+}
+
+/* The speaker's sound waves pulse while its word is being spoken. */
+.icon.speaking path:nth-child(2) {
+  animation: icon-waves 0.8s ease-in-out infinite;
+}
+
+/* The streak flame flickers a few times, then rests. */
+.icon-flicker {
+  transform-origin: 50% 90%;
+  animation: icon-flicker 1.2s ease-in-out 3;
+}
+
+@keyframes icon-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes icon-waves {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes icon-flicker {
+  25% {
+    transform: scale(1.08, 0.94) rotate(-3deg);
+  }
+  50% {
+    transform: scale(0.96, 1.06) rotate(2deg);
+  }
+  75% {
+    transform: scale(1.04, 0.97) rotate(-1deg);
+  }
+}
+
 /* ---- Icon inside a heading ---- */
 
 .heading-icon {

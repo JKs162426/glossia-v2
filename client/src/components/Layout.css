@@ -8,6 +8,9 @@
   padding: 40px;
   flex: 1;
   min-width: 0;
+  /* Cuts off whatever an animation slides past the edges (e.g. a flashcard
+     flying out) instead of adding a horizontal scrollbar. */
+  overflow-x: clip;
 }
 
 @media (max-width: 768px) {

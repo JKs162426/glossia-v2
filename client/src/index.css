@@ -466,6 +466,9 @@ kbd {
   background: var(--gradient);
   border-radius: 999px;
   transition: width 0.4s ease;
+  /* Fills from the left when it first appears; later changes use the transition. */
+  transform-origin: left;
+  animation: grow-x 0.6s ease-out both;
 }
 
 /* ---------- Feedback ---------- */
@@ -541,6 +544,34 @@ kbd {
   }
 }
 
+/* Appears from nothing with a small overshoot (stars, trophies, rewards). */
+@keyframes pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* A quick swell on something already visible (a right answer, a finished node). */
+@keyframes bump {
+  40% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 @media (max-width: 768px) {
   .page-header h1 {
     font-size: 24px;
@@ -556,6 +587,18 @@ kbd {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    /* A looping 0.01ms animation would flicker instead of stopping. */
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Removing a favorite: the list updates instantly. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
