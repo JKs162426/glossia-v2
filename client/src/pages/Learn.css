@@ -15,6 +15,7 @@
 }
 
 .level-tag {
+  position: relative;
   flex-shrink: 0;
   width: 64px;
   height: 64px;
@@ -103,6 +104,7 @@
 }
 
 .node-circle {
+  position: relative;
   width: 72px;
   height: 72px;
   border-radius: 50%;
@@ -141,7 +143,28 @@ a.path-node:active .node-circle {
   box-shadow:
     0 6px 0 #00708a,
     0 0 0 8px rgba(0, 212, 255, 0.12);
-  animation: pulse 2s ease-in-out infinite;
+  /* Squashes from the bottom, like a ball landing. */
+  transform-origin: 50% 100%;
+  animation: hop 3.6s ease-in-out 1s infinite;
+}
+
+/* A ring that ripples out from the current node. */
+.path-node.current .node-circle::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: inherit;
+  border: 2px solid rgba(0, 212, 255, 0.4);
+  pointer-events: none;
+  animation: ripple 2.4s ease-out infinite;
+}
+
+/* Hovering or focusing holds it still, so the press effect stays crisp. */
+a.path-node.current:hover .node-circle,
+a.path-node.current:focus-visible .node-circle,
+a.path-node.current:hover .node-bubble,
+a.path-node.current:focus-visible .node-bubble {
+  animation: none;
 }
 
 .path-node.checkpoint .node-circle {
@@ -188,7 +211,7 @@ a.path-node:active .node-circle {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  animation: bob 1.6s ease-in-out infinite;
+  animation: bubble-hop 3.6s ease-in-out 1s infinite;
 }
 
 .node-bubble::after {
@@ -206,17 +229,175 @@ a.path-node:active .node-circle {
   margin-top: 24px;
 }
 
-@keyframes pulse {
-  50% {
-    box-shadow:
-      0 6px 0 #00708a,
-      0 0 0 14px rgba(0, 212, 255, 0.06);
+/* ---- Back from a first completion: the node swells, its stars pop in,
+   the next node's lock shakes off and its "Start" bubble drops in ---- */
+
+.path-node.just-completed .node-circle {
+  animation: bump 0.45s ease;
+}
+
+.path-node.just-completed .node-stars .on {
+  animation: pop 0.4s ease both;
+  animation-delay: calc(0.25s + var(--n) * 0.12s);
+}
+
+.unlock-lock {
+  position: absolute;
+  color: var(--text-secondary);
+  animation: lock-open 0.8s 0.5s ease-in-out both;
+}
+
+/* The lock's only <path> is its shackle: it lifts before the lock fades. */
+.unlock-lock path {
+  animation: shackle-up 0.25s 0.8s ease-out both;
+}
+
+.path-node.just-unlocked .node-circle {
+  animation:
+    unlock-glow 0.4s 1.1s ease-out backwards,
+    hop 3.6s ease-in-out 3s infinite;
+}
+
+/* The ripple waits (hidden) until the lock is gone. */
+.path-node.just-unlocked .node-circle::after {
+  opacity: 0;
+  animation-delay: 1.5s;
+}
+
+.path-node.just-unlocked .node-circle > .icon:not(.unlock-lock) {
+  animation: pop 0.45s 1.2s ease both;
+}
+
+.path-node.just-unlocked .node-bubble {
+  animation:
+    bubble-drop 0.35s 1.4s ease-out backwards,
+    bubble-hop 3.6s ease-in-out 3s infinite;
+}
+
+/* Hovering stops only the hop, never the unlock (the cursor is often
+   resting right there after "Back to path"). */
+a.path-node.just-unlocked:hover .node-circle,
+a.path-node.just-unlocked:focus-visible .node-circle {
+  animation: unlock-glow 0.4s 1.1s ease-out backwards;
+}
+
+a.path-node.just-unlocked:hover .node-bubble,
+a.path-node.just-unlocked:focus-visible .node-bubble {
+  animation: bubble-drop 0.35s 1.4s ease-out backwards;
+}
+
+/* A new level opens: its tag pops and sparkles. */
+.level-header.just-opened .level-tag {
+  animation: pop 0.5s 0.9s ease both;
+}
+
+.level-sparkles {
+  position: absolute;
+  top: -10px;
+  right: -12px;
+  color: var(--gold);
+  animation: twinkle 0.9s 1.2s ease-in-out 2 both;
+}
+
+@keyframes hop {
+  0%,
+  70%,
+  96%,
+  100% {
+    transform: none;
+  }
+  76% {
+    transform: scale(1.06, 0.92);
+  }
+  84% {
+    transform: translateY(-12px) scale(0.96, 1.05);
+  }
+  92% {
+    transform: scale(1.04, 0.96);
   }
 }
 
-@keyframes bob {
+/* Same timing as `hop`, so the bubble rides on the node. */
+@keyframes bubble-hop {
+  0%,
+  70%,
+  92%,
+  100% {
+    transform: none;
+  }
+  76% {
+    transform: translateY(4px);
+  }
+  84% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes ripple {
+  from {
+    transform: scale(0.92);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes lock-open {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  15% {
+    transform: rotate(-12deg);
+  }
+  30% {
+    transform: rotate(9deg);
+  }
+  45% {
+    transform: rotate(-4deg);
+  }
+  60% {
+    transform: none;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes shackle-up {
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+/* Starts from the locked look and turns into the current node. */
+@keyframes unlock-glow {
+  from {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-strong);
+    box-shadow: 0 6px 0 var(--bg-secondary);
+  }
+}
+
+@keyframes bubble-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.8);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+  }
   50% {
-    transform: translateY(-4px);
+    opacity: 1;
+    transform: scale(1.1) rotate(20deg);
   }
 }
 
