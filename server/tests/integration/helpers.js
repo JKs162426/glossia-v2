@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import pool from "../../src/config/db.js";
 import { createUser } from "../../src/models/userModel.js";
@@ -8,11 +9,11 @@ import { AUTH_COOKIE, signToken } from "../../src/utils/authToken.js";
 const TEST_EMAIL_DOMAIN = "tests.glossia.dev";
 export const PASSWORD = "Password123";
 
-let counter = 0;
-
-// Credentials that are unique per call and fit the 3–30 character username rule.
+// Credentials that are unique per call and fit the 3–30 character username
+// rule. The random part matters: the e2e tests run in several processes at
+// once, and two of them can ask for a user in the same millisecond.
 export const uniqueUser = () => {
-  const username = `it_${Date.now().toString(36)}_${counter++}`;
+  const username = `it_${Date.now().toString(36)}_${crypto.randomBytes(3).toString("hex")}`;
   return { username, email: `${username}@${TEST_EMAIL_DOMAIN}`, password: PASSWORD };
 };
 
