@@ -28,7 +28,7 @@ the first load can take up to a minute while the server wakes up.
 | Database | MySQL (`mysql2`), SQL migrations |
 | Auth | JWT in an httpOnly cookie, bcrypt, Passport (Google OAuth 2.0) |
 | Security | helmet, express-rate-limit |
-| Tests | Vitest, Supertest, Testing Library (jsdom) |
+| Tests | Vitest, Supertest, Testing Library (jsdom), Playwright (end-to-end) |
 | Deploy | Render |
 
 ## Requirements
@@ -36,6 +36,7 @@ the first load can take up to a minute while the server wakes up.
 - **Node.js 22.13 or newer** (`engine-strict` is on, so npm refuses
   packages that need a newer Node than you have)
 - **MySQL 8** or newer
+- **Google Chrome**, only for the end-to-end tests
 
 ## Setup
 
@@ -89,6 +90,13 @@ npm run lint
 cd client
 npm test
 npm run lint
+
+# End-to-end — needs server/.env.test (same MySQL as above), the client's and
+# the server's npm install, and Google Chrome
+cd e2e
+npm install
+npm test                         # builds the client, starts the API on :3300, runs the flows
+npm run test:headed              # same, watching the browser
 ```
 
 - **Unit** (`server/tests/unit`, `client/src/**/*.test.{js,jsx}`): logic and
@@ -117,6 +125,17 @@ npm run lint
   deletes the users it created (emails on `tests.glossia.dev`), and their data
   goes with them through `ON DELETE CASCADE`. `helpers.js` has
   `createTestUser()`, which returns a user with a ready session cookie.
+- **End-to-end** (`e2e/tests`): Playwright drives Google Chrome through the
+  real app (the built client served by the API on port 3300, on the test
+  database, with animations off). They cover:
+  - a new learner registers, finishes the first lesson with no mistakes, sees
+    the next lesson unlocked, and the dashboard shows the XP, streak and words;
+  - flashcards with the keyboard (Space, ←, →), the missed words and
+    "Practice missed".
+
+  Any error in the browser console fails the test. Each test deletes only the
+  users it created, so the tests run in parallel. If port 3300 is busy the run
+  stops instead of testing whatever is running there.
 - With `NODE_ENV=test` the server reads **only** `server/.env.test` and refuses
   any database whose name doesn't end in `_test`, so tests can't touch real data.
 
@@ -140,6 +159,9 @@ server/
   src/db/              Migration runner (npm run migrate)
   db/migrations/       Versioned SQL schema and seed data
   tests/               unit/ and integration/ test suites
+e2e/                   End-to-end tests (Playwright)
+  tests/               One file per user flow
+  fixtures.js          Logged-in user, cleanup, console-error check
 ```
 
 ## How it fits together
