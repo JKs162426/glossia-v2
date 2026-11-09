@@ -48,6 +48,9 @@ test("practices a deck with the keyboard, then only the missed cards", async ({ 
       await page.keyboard.press("ArrowRight");
     }
     await expect(page.getByText("2 / 2")).toBeVisible();
+    // The XP appears once the server has saved the session. Without this
+    // wait, the dashboard below can load before the save lands.
+    await expect(page.getByText("+2 XP")).toBeVisible();
     await expect(page.getByRole("button", { name: /Practice missed/ })).toHaveCount(0);
   });
 
