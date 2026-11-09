@@ -1,6 +1,6 @@
 // Rewards for a finished lesson or checkpoint, from its 0–100 score.
 
-export const starsFor = (score) => (score >= 90 ? 3 : score >= 70 ? 2 : 1);
+export const starsFor = (score) => (score >= 95 ? 3 : score >= 70 ? 2 : 1);
 
 // The first completion pays the full reward (checkpoints pay double); a replay
 // still earns a little so practice counts. A perfect score adds a bonus.
