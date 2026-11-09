@@ -1,5 +1,7 @@
 # Glossia
 
+[![CI](https://github.com/JKs162426/glossia-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/JKs162426/glossia-v2/actions/workflows/ci.yml)
+
 A language-learning app: a guided A1–A2 learning path, flashcards, a translator
 and saved favorites, in 8 languages (EN, ES, FR, DE, IT, PT, RU, ZH).
 
@@ -151,6 +153,26 @@ npm run test:headed              # same, watching the browser
 - With `NODE_ENV=test` the server reads **only** `server/.env.test` and refuses
   any database whose name doesn't end in `_test`, so tests can't touch real data.
 
+### Continuous integration
+
+Every push and pull request runs three jobs on GitHub Actions
+(`.github/workflows/ci.yml`):
+
+| Job | Runs |
+| --- | --- |
+| Client | lint, unit tests, `npm audit` |
+| Server | lint, unit and integration tests against a MySQL 8.4 service, `npm audit` |
+| End-to-end | the Playwright tests in Google Chrome, on their own MySQL service |
+
+- `npm audit` fails the job on high or critical issues in the packages that
+  ship (`--omit=dev`).
+- When an end-to-end test fails, the run keeps its trace for 7 days
+  (`playwright-traces`): open it with `npx playwright show-trace trace.zip`.
+- `main` is protected: a commit can only land there once all three jobs pass.
+- Dependabot (`.github/dependabot.yml`) opens pull requests every Monday for
+  the npm packages and the GitHub Actions, only for versions released at
+  least a week earlier.
+
 ## Project structure
 
 ```
@@ -171,6 +193,7 @@ server/
   src/db/              Migration runner (npm run migrate)
   db/migrations/       Versioned SQL schema and seed data
   tests/               unit/ and integration/ test suites
+.github/               CI workflow and Dependabot settings
 e2e/                   End-to-end tests (Playwright)
   tests/               One file per user flow, plus mobile and accessibility
   fixtures.js          Logged-in user, cleanup, console-error check
