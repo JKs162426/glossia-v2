@@ -131,7 +131,19 @@ npm run test:headed              # same, watching the browser
   - a new learner registers, finishes the first lesson with no mistakes, sees
     the next lesson unlocked, and the dashboard shows the XP, streak and words;
   - flashcards with the keyboard (Space, ←, →), the missed words and
-    "Practice missed".
+    "Practice missed";
+  - the translator → save a favorite → it shows up in Favorites → remove it.
+    The test answers the MyMemory requests itself, so it never calls the
+    real service;
+  - logging out, every protected page redirecting to the login, and logging
+    back in returns to the page that was asked for;
+  - the dashboard and the learning path on a 390 px phone: nothing past the
+    screen edges, nothing hidden behind the top bar or the bottom nav, and
+    touch targets of at least 44 px;
+  - accessibility: [axe](https://github.com/dequelabs/axe-core-npm) runs its
+    automatic WCAG 2.2 A and AA checks on the main pages. Automatic checks
+    catch part of the problems, not all: keyboard and screen reader use
+    still need a person.
 
   Any error in the browser console fails the test. Each test deletes only the
   users it created, so the tests run in parallel. If port 3300 is busy the run
@@ -160,7 +172,7 @@ server/
   db/migrations/       Versioned SQL schema and seed data
   tests/               unit/ and integration/ test suites
 e2e/                   End-to-end tests (Playwright)
-  tests/               One file per user flow
+  tests/               One file per user flow, plus mobile and accessibility
   fixtures.js          Logged-in user, cleanup, console-error check
 ```
 
