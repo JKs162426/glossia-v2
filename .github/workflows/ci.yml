@@ -1,0 +1,121 @@
+# Runs every check on each push and pull request. main is protected: a
+# commit can only land there once all three jobs pass.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Read-only token: the jobs only need to read the code.
+permissions:
+  contents: read
+
+# A newer push to the same branch cancels the run that's still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  client:
+    name: Client (lint, unit tests, audit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      # Actions are pinned to a commit, not a tag that could be moved.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      # Only what ships to the browser; high and critical issues fail the job.
+      - run: npm audit --omit=dev --audit-level=high
+
+  server:
+    name: Server (lint, unit and integration tests, audit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      # The example already points at MySQL on 127.0.0.1:3306 as root with no
+      # password, which is the service above. The tests create glossia_test.
+      - run: cp .env.test.example .env.test
+      - run: npm test
+      - run: npm audit --omit=dev --audit-level=high
+
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+            e2e/package-lock.json
+      # The tests build the client and start the API themselves, so all three
+      # packages are needed. Google Chrome is already on GitHub's runners.
+      - run: npm ci --prefix client
+      - run: npm ci --prefix server
+      - run: npm ci --prefix e2e
+      - run: cp server/.env.test.example server/.env.test
+      - run: npx playwright test
+        working-directory: e2e
+      # On a failure, the trace of each failed test (screenshots, DOM,
+      # network and console) can be downloaded from the run's page.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: playwright-traces
+          path: e2e/test-results/
+          retention-days: 7
