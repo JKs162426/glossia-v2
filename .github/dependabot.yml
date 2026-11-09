@@ -1,0 +1,35 @@
+# Weekly pull requests to update dependencies. Each one runs the full CI,
+# so it can only be merged if every test still passes.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories:
+      - /client
+      - /server
+      - /e2e
+    schedule:
+      interval: weekly
+      day: monday
+    # Wait a week after a release before proposing it: a hijacked or broken
+    # version is usually caught and pulled within days.
+    cooldown:
+      default-days: 7
+    # Minor and patch updates arrive grouped; major versions, which can
+    # break things, come one by one.
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(ci)"
