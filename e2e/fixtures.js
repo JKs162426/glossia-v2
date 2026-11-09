@@ -63,4 +63,4 @@ export const test = base.extend({
   ],
 });
 
-export { expect, uniqueUser };
+export { expect, uniqueUser, AUTH_COOKIE };
