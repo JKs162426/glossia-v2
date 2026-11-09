@@ -236,6 +236,19 @@
   z-index: 2;
 }
 
+/* Centered, the first and last tooltips would be cut off at the edges of a
+   phone screen, so they open toward the inside. */
+.week-bar-col:first-child .week-tooltip {
+  left: 0;
+  transform: none;
+}
+
+.week-bar-col:last-child .week-tooltip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
 .week-bar-col:hover .week-tooltip {
   opacity: 1;
 }
