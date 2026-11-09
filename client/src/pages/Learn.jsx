@@ -49,12 +49,14 @@ function PathNode({ node, offset, celebrate }) {
 
   const content = (
     <>
-      {node.status === "current" && <span className="node-bubble">Start</span>}
       <span className="node-circle" aria-hidden="true">
         <Icon name={icon} size={node.status === "locked" ? 24 : 28} filled={icon === "star"} />
         {celebrate === "unlocked" && <Icon name="lock" size={24} className="unlock-lock" />}
       </span>
       <span className="node-title">{node.title}</span>
+      {/* After the title, so the visible text reads "Hello! Start" like the
+          label "Hello! — start". CSS places the bubble above the circle. */}
+      {node.status === "current" && <span className="node-bubble">Start</span>}
       {node.status === "completed" && <Stars count={node.stars} />}
     </>
   );

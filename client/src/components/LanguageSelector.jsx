@@ -36,9 +36,13 @@ function LanguageSelector() {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={`Learning ${current.label}. Change language`}
+        // Starts with the visible text ("Es Spanish"; on phones only "Es"),
+        // so voice control users can say what they see.
+        aria-label={`${current.mark} ${current.label} — change the language you're learning`}
       >
-        <LanguageMark code={current.code} />
+        {/* The space keeps "Es" and "Spanish" two words for assistive tech
+            (on screen, the gap between them comes from CSS). */}
+        <LanguageMark code={current.code} />{" "}
         <span className="lang-trigger-label">{current.label}</span>
         <Icon name="chevron-down" size={16} className="lang-arrow" />
       </button>

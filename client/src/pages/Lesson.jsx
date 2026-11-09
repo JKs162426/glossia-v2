@@ -339,6 +339,7 @@ function LessonRunner({ lesson }) {
         <div
           className="progress lesson-progress"
           role="progressbar"
+          aria-label="Lesson progress"
           aria-valuenow={solved}
           aria-valuemin={0}
           aria-valuemax={total}

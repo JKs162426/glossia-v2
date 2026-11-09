@@ -140,8 +140,11 @@
   font-size: 14px;
 }
 
+/* Underlined: inside a sentence, color alone doesn't mark it as a link. */
 .inline-link {
   color: var(--accent-cyan);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .chart-total {
