@@ -5,7 +5,7 @@ test("deletes the account from the Account page", async ({ page, user }) => {
     await page.goto("/");
     await page.getByRole("link", { name: new RegExp(user.username) }).click();
     await expect(page).toHaveURL(/\/account$/);
-    await expect(page.getByRole("heading", { name: "Account" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Account", exact: true })).toBeVisible();
     await expect(page.getByText("Signs in with email and password")).toBeVisible();
   });
 
