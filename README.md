@@ -16,7 +16,9 @@ the first load can take up to a minute while the server wakes up.
 - **Flashcards** by category, with progress tracking
 - **Translator** powered by the [MyMemory](https://mymemory.translated.net) API
 - **Favorites** — save words and phrases to review later
-- **Accounts** with email/password or Google sign-in
+- **Accounts** with email/password or Google sign-in. Logging out ends the
+  session on every device, and the Account page deletes the account and all
+  its data
 - **Animations with a purpose**: unlocking the next lesson, right and wrong
   answers, rewards and the streak. All of them stop with the system's
   "reduce motion" setting.
@@ -121,6 +123,11 @@ npm run lint
   - register and login (httpOnly cookie, weak password → 400, repeated email
     → 409, the same message for a wrong password or an unknown email, the 11th
     failed login → 429), `/me` and logout;
+  - sessions: logging out ends every session (a copied cookie stops working,
+    on every device), and a deleted user's token answers 401;
+  - deleting the account: it asks for the password (wrong → 403, the 11th
+    wrong one → 429) or, for Google accounts, a sign-in in the last 10
+    minutes, and the user's data goes with it;
   - authorization: another user's favorites can't be listed or deleted (404),
     locked lessons answer 403;
   - completing a lesson saves the best score, stars and XP and unlocks the next one.
@@ -140,6 +147,8 @@ npm run lint
     real service;
   - logging out, every protected page redirecting to the login, and logging
     back in returns to the page that was asked for;
+  - deleting the account from the Account page, and logging out on one
+    device ending the session on another;
   - the dashboard and the learning path on a 390 px phone: nothing past the
     screen edges, nothing hidden behind the top bar or the bottom nav, and
     touch targets of at least 44 px;
@@ -226,6 +235,9 @@ e2e/                   End-to-end tests (Playwright)
 
 - Sessions are a JWT in an **httpOnly, SameSite=Lax cookie** (not localStorage),
   so scripts on the page can't read it.
+- Each token carries the user's `token_version`. Logging out increments it,
+  so every token issued before (other devices, a copied cookie) stops working,
+  and every request checks that the user still exists.
 - Passwords: bcrypt (12 rounds), min 8 chars with a letter and a number.
 - Rate limits on login/register and on the whole API; security headers via helmet.
   Limits are counted per client IP, so in production `TRUST_PROXY_HOPS` must
@@ -245,11 +257,16 @@ same language.
 ## Deployment
 
 Render runs one web service that serves both the built React app and the API
-(same origin, so the session cookie stays first-party). Every push to `main`:
+(same origin, so the session cookie stays first-party). Every push to `main`,
+once **all** of its GitHub checks pass (Render's "After CI Checks Pass"):
 
 1. builds the client (`vite build`) and installs the server,
 2. runs `npm run migrate` (pending migrations only), then `npm start`,
 3. switches traffic once `GET /api/health` responds.
+
+Render waits for every check on the commit, not only the three CI jobs: a
+failed Dependabot run blocks the deploy too, and then it has to be started
+by hand (Manual Deploy → Deploy latest commit).
 
 The database is MySQL on Aiven, reached over TLS (`DB_SSL_CA`).
 
