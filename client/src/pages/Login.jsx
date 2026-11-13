@@ -15,6 +15,8 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(OAUTH_ERRORS[params.get("error")] || "");
+  // Set by the Account page after deleting the account.
+  const deleted = params.get("deleted") === "1";
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -38,6 +40,11 @@ function Login() {
       {error && (
         <p className="alert alert-error" role="alert">
           {error}
+        </p>
+      )}
+      {deleted && !error && (
+        <p className="alert alert-success" role="status">
+          Your account and all its data were deleted.
         </p>
       )}
 

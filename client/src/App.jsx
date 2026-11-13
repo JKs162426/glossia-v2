@@ -12,6 +12,7 @@ import CategorySelect from "./pages/CategorySelect";
 import Flashcards from "./pages/Flashcards";
 import Translator from "./pages/Translator";
 import Favorites from "./pages/Favorites";
+import Account from "./pages/Account";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/flashcards/:deckId" element={<Flashcards />} />
               <Route path="/translator" element={<Translator />} />
               <Route path="/favorites" element={<Favorites />} />
+              <Route path="/account" element={<Account />} />
             </Route>
             {/* Lessons are full-screen, without the sidebar */}
             <Route element={<ProtectedLayout bare />}>
