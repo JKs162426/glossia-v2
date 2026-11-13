@@ -40,14 +40,11 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
   const user = await findUserByEmail(email);
 
-  if (user && !user.password) {
-    return res.status(400).json({
-      message: "This account uses Google sign-in. Continue with Google.",
-    });
-  }
-
+  // Unknown emails and Google accounts (no password) get the same answer and
+  // the same bcrypt delay as a wrong password, so neither reveals the email.
+  // DUMMY_HASH's plain text is public, so a match on it must never count.
   const isMatch = await bcrypt.compare(password, user?.password || DUMMY_HASH);
-  if (!user || !isMatch) {
+  if (!user?.password || !isMatch) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
 

@@ -88,11 +88,21 @@ describe("POST /api/auth/login", () => {
     expect(setCookie(wrongPassword, AUTH_COOKIE)).toBeUndefined();
   });
 
-  it("sends Google accounts to Google sign-in (400)", async () => {
+  it("answers a Google account like an unknown email (401)", async () => {
+    // Saying "this account uses Google" would confirm the email is registered.
     const user = await createTestUser({ google: true });
     const res = await login({ email: user.email, password: "Anything123" });
-    expect(res.status).toBe(400);
-    expect(res.body.message).toMatch(/Google/);
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ message: "Invalid email or password" });
+    expect(setCookie(res, AUTH_COOKIE)).toBeUndefined();
+  });
+
+  it("never logs in to a Google account with the timing-guard password", async () => {
+    // Google accounts are compared against a dummy hash whose text is public.
+    const user = await createTestUser({ google: true });
+    const res = await login({ email: user.email, password: "glossia-timing-guard" });
+    expect(res.status).toBe(401);
+    expect(setCookie(res, AUTH_COOKIE)).toBeUndefined();
   });
 });
 
