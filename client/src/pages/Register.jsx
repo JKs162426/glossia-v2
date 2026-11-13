@@ -1,16 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
-import { AuthShell, GoogleButton, PasswordInput } from "../components/AuthShell";
-import { Icon } from "../components/Icon";
+import { AuthShell, GoogleButton, PasswordInput, PasswordRules } from "../components/AuthShell";
 import { errorMessage } from "../lib/utils";
+import { meetsPasswordRules } from "../lib/passwordRules";
 
-// Mirrors the server-side rules in server/src/middleware/validators.js
-const PASSWORD_RULES = [
-  { label: "8+ characters", test: (p) => p.length >= 8 },
-  { label: "A letter", test: (p) => /[a-zA-Z]/.test(p) },
-  { label: "A number", test: (p) => /\d/.test(p) },
-];
 const USERNAME_PATTERN = /^[a-zA-Z0-9_]{3,30}$/;
 
 function Register() {
@@ -24,7 +18,7 @@ function Register() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const passwordOk = PASSWORD_RULES.every((rule) => rule.test(form.password));
+  const passwordOk = meetsPasswordRules(form.password);
   const usernameOk = USERNAME_PATTERN.test(form.username);
   const usernameInvalid = form.username.length > 0 && !usernameOk;
 
@@ -96,16 +90,7 @@ function Register() {
             show={showPassword}
             onToggle={() => setShowPassword((s) => !s)}
           />
-          <ul id="password-rules" className="password-rules">
-            {PASSWORD_RULES.map((rule) => {
-              const met = rule.test(form.password);
-              return (
-                <li key={rule.label} className={met ? "met" : ""}>
-                  <Icon name={met ? "check" : "ring"} size={12} /> {rule.label}
-                </li>
-              );
-            })}
-          </ul>
+          <PasswordRules id="password-rules" password={form.password} />
         </div>
         <button
           className="btn btn-primary btn-block"
