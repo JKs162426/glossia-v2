@@ -102,4 +102,14 @@ test.describe("logged in", () => {
     await expect(page.getByRole("heading", { name: "buenos días" })).toBeVisible();
     await expectNoViolations(page);
   });
+
+  test("account, with the delete confirmation open", async ({ page, user }) => {
+    await page.goto("/account");
+    await expect(page.getByRole("heading", { name: "Account", exact: true })).toBeVisible();
+    await expectNoViolations(page);
+
+    await page.getByRole("button", { name: "Delete account…" }).click();
+    await page.getByLabel("Enter your password to confirm").fill(user.password);
+    await expectNoViolations(page);
+  });
 });

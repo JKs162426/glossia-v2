@@ -4,12 +4,15 @@ import {
   createUser,
   findUserByEmail,
   findUserById,
+  revokeSessions,
   usernameExists,
 } from "../models/userModel.js";
 import {
   setAuthCookie,
   clearAuthCookie,
   publicUser,
+  tokenFrom,
+  verifyToken,
 } from "../utils/authToken.js";
 
 const BCRYPT_ROUNDS = 12;
@@ -52,7 +55,22 @@ export const login = async (req, res) => {
   res.json({ user: publicUser(user) });
 };
 
-export const logout = (_req, res) => {
+// Bumps the user's token_version so this token, and every other one issued
+// before it (other devices, a copied cookie), stops working. A missing,
+// forged or already revoked token has nothing to revoke: the cookie is
+// cleared all the same.
+export const logout = async (req, res) => {
+  const token = tokenFrom(req);
+  let payload = null;
+  if (token) {
+    try {
+      payload = verifyToken(token);
+    } catch {
+      // Expired or forged.
+    }
+  }
+  if (payload) await revokeSessions(payload.id, payload.ver ?? 0);
+
   clearAuthCookie(res);
   res.json({ message: "Logged out" });
 };

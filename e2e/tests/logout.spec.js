@@ -10,6 +10,7 @@ const PROTECTED_PAGES = [
   "/flashcards/favorites",
   "/translator",
   "/favorites",
+  "/account",
 ];
 
 test("logging out ends the session and protected pages redirect to the login", async ({
