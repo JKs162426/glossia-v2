@@ -99,6 +99,7 @@ cd e2e
 npm install
 npm test                         # builds the client, starts the API on :3300, runs the flows
 npm run test:headed              # same, watching the browser
+npm run lint
 ```
 
 - **Unit** (`server/tests/unit`, `client/src/**/*.test.{js,jsx}`): logic and
@@ -162,7 +163,7 @@ Every push and pull request runs three jobs on GitHub Actions
 | --- | --- |
 | Client | lint, unit tests, `npm audit` |
 | Server | lint, unit and integration tests against a MySQL 8.4 service, `npm audit` |
-| End-to-end | the Playwright tests in Google Chrome, on their own MySQL service |
+| End-to-end | lint, the Playwright tests in Google Chrome, on their own MySQL service |
 
 - `npm audit` fails the job on high or critical issues in the packages that
   ship (`--omit=dev`).
