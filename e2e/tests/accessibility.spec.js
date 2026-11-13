@@ -41,6 +41,20 @@ test.describe("logged out", () => {
     await expect(page.getByRole("button", { name: "Create account" })).toBeVisible();
     await expectNoViolations(page);
   });
+
+  test("forgot password page", async ({ page }) => {
+    await page.goto("/forgot-password");
+    await expect(page.getByRole("button", { name: "Send reset link" })).toBeVisible();
+    await expectNoViolations(page);
+  });
+
+  test("new password page", async ({ page }) => {
+    // Any well-formed token shows the form; it's only checked on submit.
+    await page.goto(`/reset-password#token=${"a".repeat(43)}`);
+    await page.getByLabel("New password").fill("BrandNew456");
+    await expect(page.getByRole("button", { name: "Set new password" })).toBeEnabled();
+    await expectNoViolations(page);
+  });
 });
 
 test.describe("logged in", () => {

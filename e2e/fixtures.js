@@ -37,10 +37,15 @@ export const test = base.extend({
     if (emails.length) await pool.query("DELETE FROM users WHERE email IN (?)", [emails]);
   },
 
+  // A new account that isn't logged in anywhere.
+  account: async ({ usersToDelete }, use) => {
+    const account = await createTestUser();
+    usersToDelete.push(account.email);
+    await use(account);
+  },
+
   // A new account, already logged in in the browser.
-  user: async ({ context, baseURL, usersToDelete }, use) => {
-    const user = await createTestUser();
-    usersToDelete.push(user.email);
+  user: async ({ context, baseURL, account: user }, use) => {
     await context.addCookies([
       {
         name: AUTH_COOKIE,
