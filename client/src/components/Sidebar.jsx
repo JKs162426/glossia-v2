@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import LanguageSelector from "./LanguageSelector";
 import { Icon } from "./Icon";
@@ -33,6 +33,11 @@ function Sidebar() {
         <span className="sidebar-logo-text gradient-text">Glossia</span>
         <div className="mobile-topbar-actions">
           <LanguageSelector />
+          <Link className="icon-btn" to="/account" aria-label="Account" title="Account">
+            <span className="avatar avatar-sm" aria-hidden="true">
+              {initial}
+            </span>
+          </Link>
           <button
             className="icon-btn"
             onClick={logout}
@@ -76,7 +81,7 @@ function Sidebar() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-user">
+          <Link className="sidebar-user" to="/account" title="Account">
             <div className="avatar" aria-hidden="true">
               {initial}
             </div>
@@ -84,7 +89,7 @@ function Sidebar() {
               <p className="sidebar-username">{user?.username}</p>
               <p className="sidebar-email">{user?.email}</p>
             </div>
-          </div>
+          </Link>
           <button className="logout-btn" onClick={logout}>
             <Icon name="logout" size={18} /> Log out
           </button>
