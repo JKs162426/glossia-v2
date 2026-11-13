@@ -1,32 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import Account from "./Account";
 
-const auth = vi.hoisted(() => ({ user: null, setUser: vi.fn() }));
+const auth = vi.hoisted(() => ({ user: null }));
 const api = vi.hoisted(() => ({ delete: vi.fn() }));
+const navigation = vi.hoisted(() => ({ reloadAt: vi.fn() }));
 
 vi.mock("../context/auth-context", () => ({ useAuth: () => auth }));
 vi.mock("../services/api", () => ({ default: api, API_URL: "/api" }));
+vi.mock("../lib/navigation", () => navigation);
 
 const passwordUser = { id: 1, username: "ana", email: "ana@example.com", has_password: true };
 const googleUser = { ...passwordUser, has_password: false };
 
-function Where() {
-  const { pathname, search } = useLocation();
-  return <output data-testid="where">{pathname + search}</output>;
-}
-
 const renderAccount = (user) => {
   auth.user = user;
-  render(
-    <MemoryRouter initialEntries={["/account"]}>
-      <Routes>
-        <Route path="/account" element={<Account />} />
-        <Route path="/login" element={<Where />} />
-      </Routes>
-    </MemoryRouter>,
-  );
+  render(<Account />);
 };
 
 const typePassword = (value) =>
@@ -34,11 +23,11 @@ const typePassword = (value) =>
     target: { value },
   });
 
-const rejectWith =(status, data) =>
+const rejectWith = (status, data) =>
   Object.assign(new Error("Request failed"), { response: { status, data } });
 
 beforeEach(() => {
-  auth.setUser.mockReset();
+  navigation.reloadAt.mockReset();
   api.delete.mockReset();
 });
 
@@ -54,9 +43,8 @@ describe("Account: delete account", () => {
     typePassword("Password123");
     fireEvent.click(submit);
 
-    expect(await screen.findByTestId("where")).toHaveTextContent("/login?deleted=1");
+    await waitFor(() => expect(navigation.reloadAt).toHaveBeenCalledWith("/login?deleted=1"));
     expect(api.delete).toHaveBeenCalledWith("/users/me", { data: { password: "Password123" } });
-    expect(auth.setUser).toHaveBeenCalledWith(null);
   });
 
   it("shows the server's message on a wrong password and keeps the user here", async () => {
@@ -68,7 +56,7 @@ describe("Account: delete account", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete my account forever" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Incorrect password");
-    expect(auth.setUser).not.toHaveBeenCalled();
+    expect(navigation.reloadAt).not.toHaveBeenCalled();
     // The button is usable again for another try.
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Delete my account forever" })).toBeEnabled(),

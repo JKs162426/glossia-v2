@@ -48,6 +48,18 @@
   border-color: rgba(239, 68, 68, 0.35);
 }
 
+/* Plain --error text on its tinted background is ~3.6:1 here; this lighter
+   red (as in .alert-error) is ~8:1, and white on the darker hover red ~6.5:1. */
+.danger-zone .btn-error {
+  color: #fca5a5;
+}
+
+.danger-zone .btn-error:hover:not(:disabled) {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
+  color: #fff;
+}
+
 .danger-zone h2 {
   font-size: 18px;
   margin-bottom: 8px;

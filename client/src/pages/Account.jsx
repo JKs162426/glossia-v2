@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api, { API_URL } from "../services/api";
 import { useAuth } from "../context/auth-context";
 import { PasswordInput } from "../components/AuthShell";
 import { errorMessage } from "../lib/utils";
+import { reloadAt } from "../lib/navigation";
 import "./Account.css";
 
 function Account() {
-  const { user, setUser } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [confirming, setConfirming] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -29,8 +28,9 @@ function Account() {
     setSubmitting(true);
     try {
       await api.delete("/users/me", { data: user.has_password ? { password } : {} });
-      navigate("/login?deleted=1", { replace: true });
-      setUser(null);
+      // A fresh page rather than navigate() + setUser(null): with no user, the
+      // protected layout redirects to a plain /login first, and the notice is lost.
+      reloadAt("/login?deleted=1");
     } catch (err) {
       setNeedsGoogle(Boolean(err.response?.data?.reauth));
       setError(errorMessage(err, "Couldn't delete your account. Try again."));
