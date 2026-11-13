@@ -7,13 +7,23 @@ import {
   logout,
   getMe,
   googleCallback,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/authController.js";
 import {
   registerValidators,
   loginValidators,
+  forgotPasswordValidators,
+  resetPasswordValidators,
 } from "../middleware/validators.js";
 import { validate } from "../middleware/validate.js";
-import { loginLimiter, registerLimiter } from "../middleware/rateLimit.js";
+import {
+  loginLimiter,
+  registerLimiter,
+  forgotPasswordLimiter,
+  forgotPasswordEmailLimiter,
+  resetPasswordLimiter,
+} from "../middleware/rateLimit.js";
 import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
@@ -29,6 +39,23 @@ router.post(
 router.post("/login", loginLimiter, loginValidators, validate, login);
 router.post("/logout", logout);
 router.get("/me", authMiddleware, getMe);
+
+// Password reset
+router.post(
+  "/forgot-password",
+  forgotPasswordLimiter,
+  forgotPasswordValidators,
+  validate,
+  forgotPasswordEmailLimiter,
+  forgotPassword,
+);
+router.post(
+  "/reset-password",
+  resetPasswordValidators,
+  validate,
+  resetPasswordLimiter,
+  resetPassword,
+);
 
 // Google OAuth
 const googleFailure = `${config.clientUrl}/login?error=google`;

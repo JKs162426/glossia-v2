@@ -42,6 +42,16 @@ if (isProd && process.env.JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
+// Password reset links go out by email, so production can't run without an
+// SMTP provider (Brevo). Elsewhere emails stay in a local outbox.
+const mailRequired = ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "MAIL_FROM"];
+const missingMail = mailRequired.filter((key) => !process.env[key]);
+if (isProd && missingMail.length) {
+  console.error(`Missing required env vars for email: ${missingMail.join(", ")}`);
+  process.exit(1);
+}
+const smtpPort = Number(process.env.SMTP_PORT) || 587;
+
 // On Render the app is served from one origin; Render provides its public URL.
 const publicUrl = process.env.RENDER_EXTERNAL_URL;
 
@@ -73,6 +83,22 @@ const config = {
     callbackURL:
       process.env.GOOGLE_CALLBACK_URL ||
       `${publicUrl || "http://localhost:3000"}/api/auth/google/callback`,
+  },
+  mail: {
+    from: process.env.MAIL_FROM || "Glossia <no-reply@localhost>",
+    // null: no provider configured, emails go to the outbox (mailer.js).
+    smtp: process.env.SMTP_HOST
+      ? {
+          host: process.env.SMTP_HOST,
+          port: smtpPort,
+          // 465 is TLS from the start; 587 upgrades with STARTTLS.
+          secure: smtpPort === 465,
+          requireTLS: smtpPort !== 465,
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        }
+      : null,
+    // The e2e tests read the emails the server "sent" from this file.
+    outboxFile: process.env.MAIL_OUTBOX_FILE,
   },
 };
 

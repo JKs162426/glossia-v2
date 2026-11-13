@@ -14,8 +14,15 @@ import {
   tokenFrom,
   verifyToken,
 } from "../utils/authToken.js";
+import { createPasswordReset, resetPasswordWithToken } from "../models/passwordResetModel.js";
+import { INVALID_RESET_LINK } from "../middleware/validators.js";
+import { sendMail } from "../services/mailer.js";
+import { passwordChangedEmail, passwordResetEmail } from "../services/emails.js";
 
 const BCRYPT_ROUNDS = 12;
+
+export const FORGOT_PASSWORD_MESSAGE =
+  "If there's an account with that email, we've sent it a link to choose a new password.";
 
 // Compared against when the email doesn't exist, so a failed login takes the
 // same time either way and can't be used to discover registered emails.
@@ -73,6 +80,48 @@ export const logout = async (req, res) => {
 
   clearAuthCookie(res);
   res.json({ message: "Logged out" });
+};
+
+const sendResetLink = async (email) => {
+  const user = await findUserByEmail(email);
+  if (!user) return;
+  const token = await createPasswordReset(user.id);
+  // In the fragment (#), not the query: browsers never send it to a server,
+  // so the token stays out of access logs and Referer headers.
+  const link = `${config.clientUrl}/reset-password#token=${token}`;
+  await sendMail(passwordResetEmail({ to: user.email, username: user.username, link }));
+};
+
+// The answer goes out before looking anything up, so neither its content nor
+// its timing tells whether the email has an account. Google accounts get a
+// link too: it lets them add a password.
+export const forgotPassword = async (req, res) => {
+  res.status(202).json({ message: FORGOT_PASSWORD_MESSAGE });
+  try {
+    await sendResetLink(req.body.email);
+  } catch (err) {
+    console.error("Password reset email failed:", err.message);
+  }
+};
+
+// One-use link: sets the new password and logs out every device (the
+// browser that used it included, so it signs in with the new password).
+export const resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const userId = await resetPasswordWithToken(token, passwordHash);
+  if (!userId) return res.status(400).json({ message: INVALID_RESET_LINK });
+
+  clearAuthCookie(res);
+  res.json({ message: "Password updated" });
+
+  try {
+    const user = await findUserById(userId);
+    const forgotLink = `${config.clientUrl}/forgot-password`;
+    await sendMail(passwordChangedEmail({ to: user.email, username: user.username, forgotLink }));
+  } catch (err) {
+    console.error("Password changed email failed:", err.message);
+  }
 };
 
 export const googleCallback = (req, res) => {
