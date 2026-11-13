@@ -81,6 +81,13 @@ describe("publicUser", () => {
       username: "ana",
       email: "ana@example.com",
       target_language: "es",
+      has_password: true,
     });
+  });
+
+  it("says whether there is a password, from the hash or from has_password", () => {
+    expect(publicUser({ ...user, password: null }).has_password).toBe(false);
+    expect(publicUser({ id: 7, has_password: 0 }).has_password).toBe(false);
+    expect(publicUser({ id: 7, has_password: 1 }).has_password).toBe(true);
   });
 });

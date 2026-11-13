@@ -45,9 +45,11 @@ export const clearAuthCookie = (res) => {
   res.clearCookie(AUTH_COOKIE, cookieOptions);
 };
 
+// findUserById gives has_password; findUserByEmail gives the hash itself.
 export const publicUser = (user) => ({
   id: user.id,
   username: user.username,
   email: user.email,
   target_language: user.target_language || "es",
+  has_password: Boolean(user.has_password ?? user.password),
 });

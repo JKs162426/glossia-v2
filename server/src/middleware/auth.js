@@ -25,7 +25,9 @@ const authMiddleware = async (req, res, next) => {
     return invalidSession(res);
   }
 
-  req.user = { id: user.id, username: user.username };
+  // signedInAt (seconds): tokens are only issued at sign-in, so it's when
+  // the user last proved who they are.
+  req.user = { id: user.id, username: user.username, signedInAt: payload.iat };
   next();
 };
 

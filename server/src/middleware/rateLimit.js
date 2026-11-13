@@ -19,6 +19,17 @@ export const loginLimiter = rateLimit({
   message: { message: "Too many login attempts. Try again in 15 minutes." },
 });
 
+// Deleting the account asks for the password: same protection as login, so
+// someone with a stolen session can't guess it.
+export const deleteAccountLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { message: "Too many attempts. Try again in 15 minutes." },
+});
+
 export const registerLimiter = limiter(
   60,
   10,
