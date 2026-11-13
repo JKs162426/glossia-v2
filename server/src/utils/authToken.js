@@ -12,14 +12,26 @@ const cookieOptions = {
   path: "/",
 };
 
+// `ver` is the user's token_version when the token was issued; logging out
+// bumps it, and the auth middleware rejects tokens with an older one.
 export const signToken = (user) =>
-  jwt.sign({ id: user.id, username: user.username }, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn,
-    algorithm: "HS256",
-  });
+  jwt.sign(
+    { id: user.id, username: user.username, ver: user.token_version ?? 0 },
+    config.jwtSecret,
+    { expiresIn: config.jwtExpiresIn, algorithm: "HS256" },
+  );
 
 export const verifyToken = (token) =>
   jwt.verify(token, config.jwtSecret, { algorithms: ["HS256"] });
+
+// Cookie for the web client; Bearer header kept for API tools like test.http.
+export const tokenFrom = (req) => {
+  const header = req.headers.authorization;
+  return (
+    req.cookies?.[AUTH_COOKIE] ||
+    (header?.startsWith("Bearer ") ? header.slice(7) : null)
+  );
+};
 
 // The token lives in an httpOnly cookie so page scripts (and any XSS) can't read it.
 export const setAuthCookie = (res, user) => {

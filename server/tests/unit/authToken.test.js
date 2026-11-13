@@ -12,7 +12,7 @@ import {
 const user = { id: 7, username: "ana", email: "ana@example.com", password: "hash" };
 
 describe("signToken / verifyToken", () => {
-  it("signs with HS256 and only the user's id and username", () => {
+  it("signs with HS256: id, username and version, nothing personal", () => {
     const token = signToken(user);
     const { header, payload } = jwt.decode(token, { complete: true });
     expect(header.alg).toBe("HS256");
@@ -20,6 +20,11 @@ describe("signToken / verifyToken", () => {
     expect(payload).not.toHaveProperty("email");
     expect(payload).not.toHaveProperty("password");
     expect(payload.exp).toBeGreaterThan(payload.iat);
+  });
+
+  it("carries the user's token_version (0 when the user has none yet)", () => {
+    expect(jwt.decode(signToken({ ...user, token_version: 3 })).ver).toBe(3);
+    expect(jwt.decode(signToken(user)).ver).toBe(0);
   });
 
   it("verifies its own tokens", () => {
