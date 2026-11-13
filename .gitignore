@@ -1,3 +1,6 @@
 node_modules/
 .env
 dist/
+
+# Daily work reports, kept on this computer only
+reportes/

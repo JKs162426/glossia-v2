@@ -48,7 +48,17 @@ export const loginValidators = [
     .withMessage("Invalid credentials"),
 ];
 
-export const languageBodyValidator = [languageIn(body("language"))];
+// Google accounts send no password.
+export const deleteAccountValidators = [
+  body("password")
+    .optional()
+    .isString()
+    .withMessage("Invalid password")
+    .isLength({ max: 72 })
+    .withMessage("Invalid password"),
+];
+
+export const languageBodyValidator =[languageIn(body("language"))];
 
 export const languageQueryValidator = [languageIn(query("language"))];
 

@@ -20,6 +20,7 @@ describe("POST /api/auth/register", () => {
       username: user.username,
       email: user.email,
       target_language: "es",
+      has_password: true,
     });
     const cookie = setCookie(res, AUTH_COOKIE);
     expect(cookie).toMatch(/HttpOnly/i);
@@ -130,6 +131,7 @@ describe("GET /api/auth/me", () => {
       username: user.username,
       email: user.email,
       target_language: "es",
+      has_password: true,
     });
   });
 });
