@@ -40,3 +40,16 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
+      # Email via Brevo SMTP — required: the API won't start without them.
+      # SMTP_USER is Brevo's SMTP login, SMTP_PASS an SMTP key, MAIL_FROM a
+      # sender verified in Brevo, e.g. "Glossia <you@example.com>".
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
