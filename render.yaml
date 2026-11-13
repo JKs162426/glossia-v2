@@ -2,7 +2,7 @@
 # One web service: Express serves the API (/api) and the built React app.
 services:
   - type: web
-    name: glossia
+    name: glossia-v2
     runtime: node
     plan: free
     buildCommand: >-
@@ -11,7 +11,8 @@ services:
     # Migrations are idempotent, so running them on every start is safe.
     startCommand: cd server && npm run migrate && npm start
     healthCheckPath: /api/health
-    autoDeploy: true
+    # Deploy a commit on main only after its GitHub Actions checks pass.
+    autoDeployTrigger: checksPass
     envVars:
       - key: NODE_ENV
         value: production
