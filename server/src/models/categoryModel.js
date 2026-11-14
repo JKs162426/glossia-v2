@@ -28,3 +28,13 @@ export const getWordsByCategory = async (categoryId, language) => {
   );
   return rows;
 };
+
+// The deck's cards as the client shows them: `translation` is the word in
+// the language being learned (see getCategoryDeck).
+export const getCategoryTerms = async (categoryId, language) => {
+  const [rows] = await pool.query(
+    "SELECT translation FROM category_words WHERE category_id = ? AND language = ?",
+    [categoryId, language],
+  );
+  return new Set(rows.map((row) => row.translation));
+};

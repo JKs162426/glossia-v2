@@ -33,3 +33,12 @@ export const deleteFavorite = async (id, userId) => {
   );
   return result.affectedRows;
 };
+
+// The favorites deck: the user's saved words in one language.
+export const getFavoriteTerms = async (userId, language) => {
+  const [rows] = await pool.query(
+    "SELECT word FROM favorite_words WHERE user_id = ? AND language = ?",
+    [userId, language],
+  );
+  return new Set(rows.map((row) => row.word));
+};
