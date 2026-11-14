@@ -67,6 +67,8 @@ describe("buildExercises", () => {
       language,
     });
 
+  // The server refuses a result whose total isn't this number
+  // (exerciseCountFor in server/src/services/curriculumService.js).
   it("builds 12 exercises for a lesson and 11 for a checkpoint", () => {
     expect(lesson()).toHaveLength(12);
     expect(checkpoint()).toHaveLength(11);
