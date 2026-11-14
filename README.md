@@ -17,8 +17,8 @@ the first load can take up to a minute while the server wakes up.
 - **Translator** powered by the [MyMemory](https://mymemory.translated.net) API
 - **Favorites** — save words and phrases to review later
 - **Accounts** with email/password or Google sign-in. Logging out ends the
-  session on every device, and the Account page deletes the account and all
-  its data
+  session on every device, a forgotten password is reset with a link sent by
+  email, and the Account page deletes the account and all its data
 - **Animations with a purpose**: unlocking the next lesson, right and wrong
   answers, rewards and the streak. All of them stop with the system's
   "reduce motion" setting.
@@ -76,6 +76,11 @@ register `http://localhost:3000/api/auth/google/callback` as a redirect URI.
 | `JWT_SECRET` | Signs session tokens; required, 32+ chars in production |
 | `JWT_EXPIRES_IN` | Session length (default `7d`) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL` | Optional Google sign-in |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP provider for emails (Brevo: `smtp-relay.brevo.com`, port `587`, the SMTP login and an SMTP key). Required in production |
+| `MAIL_FROM` | Sender, e.g. `Glossia <you@example.com>`; must be a sender verified in Brevo. Required in production |
+
+Without `SMTP_HOST` (development, tests) emails aren't sent: the server prints
+them in the terminal, reset link included.
 
 `client/.env` (development only): `VITE_API_URL` — the API base URL.
 
@@ -123,6 +128,11 @@ npm run lint
   - register and login (httpOnly cookie, weak password → 400, repeated email
     → 409, the same message for a wrong password or an unknown email, the 11th
     failed login → 429), `/me` and logout;
+  - password reset: the same answer for an account and an unknown email
+    (only the account gets an email), a one-use link that expires in 30
+    minutes (reused, expired, made-up or replaced → 400), only the token's
+    hash stored, the password rules, every session ended, two requests with
+    one link (only one wins), and the limits per IP and per address;
   - sessions: logging out ends every session (a copied cookie stops working,
     on every device), and a deleted user's token answers 401;
   - deleting the account: it asks for the password (wrong → 403, the 11th
@@ -149,6 +159,9 @@ npm run lint
     back in returns to the page that was asked for;
   - deleting the account from the Account page, and logging out on one
     device ending the session on another;
+  - "Forgot password?": the reset link arrives by email (the test server
+    writes emails to a file the test reads), the new password works and the
+    old one doesn't;
   - the dashboard and the learning path on a 390 px phone: nothing past the
     screen edges, nothing hidden behind the top bar or the bottom nav, and
     touch targets of at least 44 px;
@@ -239,6 +252,13 @@ e2e/                   End-to-end tests (Playwright)
   so every token issued before (other devices, a copied cookie) stops working,
   and every request checks that the user still exists.
 - Passwords: bcrypt (12 rounds), min 8 chars with a letter and a number.
+- Password reset: `POST /api/auth/forgot-password` answers the same (and
+  before looking anything up) whether or not the email has an account. The
+  emailed link carries a random 256-bit token in the URL fragment (`#`), so
+  it never reaches server logs or `Referer`; the database stores only its
+  SHA-256. The link works once, for 30 minutes, and asking again cancels it.
+  Using it bumps `token_version`, so every session ends. Limits: 5 requests
+  per IP per 15 min, 3 per address per hour, 10 failed resets per 15 min.
 - Rate limits on login/register and on the whole API; security headers via helmet.
   Limits are counted per client IP, so in production `TRUST_PROXY_HOPS` must
   match the number of proxies in front of the app — **3 on Render**. To check
@@ -246,7 +266,8 @@ e2e/                   End-to-end tests (Playwright)
   first 12 hex chars of `sha256(your IP)`, and must not change when you send a
   fake `X-Forwarded-For`.
 - Google OAuth uses the `state` parameter (kept in a short-lived cookie) and never puts tokens in URLs.
-- The API refuses to start without `JWT_SECRET`.
+- The API refuses to start without `JWT_SECRET`, or in production without
+  the SMTP settings.
 
 ### Adding a lesson
 

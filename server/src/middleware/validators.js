@@ -15,16 +15,8 @@ const email = () =>
 const languageIn = (field) =>
   field.isIn(LANGUAGE_CODES).withMessage("Unsupported language");
 
-export const registerValidators = [
-  body("username")
-    .trim()
-    .notEmpty()
-    .withMessage("Username is required")
-    .isLength({ min: 3, max: 30 })
-    .withMessage("Username must be 3–30 characters")
-    .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage("Username can only contain letters, numbers and underscores"),
-  email(),
+// The rules for a password someone chooses (registering or resetting it).
+const newPassword = () =>
   body("password")
     .isString()
     .isLength({ min: 8 })
@@ -35,7 +27,34 @@ export const registerValidators = [
     .matches(/[a-zA-Z]/)
     .withMessage("Password must contain at least one letter")
     .matches(/\d/)
-    .withMessage("Password must contain at least one number"),
+    .withMessage("Password must contain at least one number");
+
+export const INVALID_RESET_LINK = "This link is invalid or has expired. Ask for a new one.";
+
+export const registerValidators = [
+  body("username")
+    .trim()
+    .notEmpty()
+    .withMessage("Username is required")
+    .isLength({ min: 3, max: 30 })
+    .withMessage("Username must be 3–30 characters")
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage("Username can only contain letters, numbers and underscores"),
+  email(),
+  newPassword(),
+];
+
+export const forgotPasswordValidators = [email()];
+
+export const resetPasswordValidators = [
+  // 32 random bytes in base64url (passwordResetModel.js).
+  body("token")
+    .isString()
+    .withMessage(INVALID_RESET_LINK)
+    .bail()
+    .matches(/^[A-Za-z0-9_-]{43}$/)
+    .withMessage(INVALID_RESET_LINK),
+  newPassword(),
 ];
 
 export const loginValidators = [

@@ -1,4 +1,6 @@
 import { API_URL } from "../services/api";
+import { PASSWORD_RULES } from "../lib/passwordRules";
+import { Icon } from "./Icon";
 import "./AuthShell.css";
 
 export function AuthShell({ subtitle, children }) {
@@ -33,6 +35,22 @@ export function GoogleButton() {
         Continue with Google
       </a>
     </>
+  );
+}
+
+// The checklist under a new password; each rule turns green once it's met.
+export function PasswordRules({ id, password }) {
+  return (
+    <ul id={id} className="password-rules">
+      {PASSWORD_RULES.map((rule) => {
+        const met = rule.test(password);
+        return (
+          <li key={rule.label} className={met ? "met" : ""}>
+            <Icon name={met ? "check" : "ring"} size={12} /> {rule.label}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

@@ -4,6 +4,8 @@ import { LanguageProvider } from "./context/LanguageContext";
 import { ProtectedLayout, PublicOnly } from "./components/Layout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import AuthCallback from "./pages/AuthCallback";
 import Home from "./pages/Home";
 import Learn from "./pages/Learn";
@@ -23,8 +25,11 @@ function App() {
             <Route element={<PublicOnly />}>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
             </Route>
             <Route path="/auth/callback" element={<AuthCallback />} />
+            {/* Logged in or not: the emailed link must always open. */}
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route element={<ProtectedLayout />}>
               <Route path="/" element={<Home />} />

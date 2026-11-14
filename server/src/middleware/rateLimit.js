@@ -30,6 +30,36 @@ export const deleteAccountLimiter = rateLimit({
   message: { message: "Too many attempts. Try again in 15 minutes." },
 });
 
+// Every request sends an email, so it's limited per IP and per address:
+// nobody can flood someone's inbox with reset links from many IPs.
+export const forgotPasswordLimiter = limiter(
+  15,
+  5,
+  "Too many requests. Try again in 15 minutes.",
+);
+export const forgotPasswordEmailLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 3,
+  // After the validators, so the address is already trimmed and lowercased.
+  keyGenerator: (req) => req.body.email,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { message: "Too many requests for this email. Try again in an hour." },
+});
+
+// The token is 256 random bits, so this isn't about guessing it: it caps the
+// bcrypt work (cost 12) of failed attempts. It runs after validation, so
+// malformed tokens (rejected for free) don't count, and successful resets
+// need a real token, which forgot-password already limits.
+export const resetPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { message: "Too many attempts. Try again in 15 minutes." },
+});
+
 export const registerLimiter = limiter(
   60,
   10,

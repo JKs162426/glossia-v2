@@ -15,8 +15,13 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(OAUTH_ERRORS[params.get("error")] || "");
-  // Set by the Account page after deleting the account.
-  const deleted = params.get("deleted") === "1";
+  // Set by the Account page after deleting the account, and by the reset
+  // password page after a new password.
+  const notice = params.get("deleted") === "1"
+    ? "Your account and all its data were deleted."
+    : params.get("reset") === "1"
+      ? "Your password was changed. Log in with the new one."
+      : "";
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -42,9 +47,9 @@ function Login() {
           {error}
         </p>
       )}
-      {deleted && !error && (
+      {notice && !error && (
         <p className="alert alert-success" role="status">
-          Your account and all its data were deleted.
+          {notice}
         </p>
       )}
 
@@ -77,6 +82,9 @@ function Login() {
             show={showPassword}
             onToggle={() => setShowPassword((s) => !s)}
           />
+          <Link className="auth-forgot" to="/forgot-password" state={{ email: form.email.trim() }}>
+            Forgot password?
+          </Link>
         </div>
         <button
           className="btn btn-primary btn-block"

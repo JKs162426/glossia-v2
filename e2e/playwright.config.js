@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { OUTBOX_FILE } from "./outbox.js";
 
 const PORT = 3300;
 
@@ -24,6 +25,8 @@ export default defineConfig({
   webServer: {
     command: `npm --prefix ../client run build && NODE_ENV=test PORT=${PORT} node ../server/src/server.js`,
     url: `http://localhost:${PORT}/api/health`,
+    // Emails (password reset links) go to a file the tests read.
+    env: { MAIL_OUTBOX_FILE: OUTBOX_FILE },
     // Always a fresh server: if the port is taken, Playwright stops with an
     // error instead of silently testing whatever app is running there (and
     // the in-memory rate limits start from zero on every run).

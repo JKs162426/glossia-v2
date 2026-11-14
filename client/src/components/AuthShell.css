@@ -124,6 +124,22 @@
   text-decoration: underline;
 }
 
+.auth-intro {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.auth-forgot {
+  align-self: flex-end;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent-cyan);
+}
+
+.auth-forgot:hover {
+  text-decoration: underline;
+}
+
 .auth-divider {
   display: flex;
   align-items: center;
