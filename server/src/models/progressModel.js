@@ -1,5 +1,8 @@
 import pool from "../config/db.js";
 
+// The writes below take `db`: the pool, or a transaction's connection
+// (withTransaction in config/db.js) so a lesson or a session saves all or nothing.
+
 // ---- Learning path ----
 
 export const getLessonProgress = async (userId, language) => {
@@ -10,8 +13,11 @@ export const getLessonProgress = async (userId, language) => {
   return new Map(rows.map((row) => [row.lesson_id, row]));
 };
 
-export const saveLessonResult = async (userId, language, lessonId, score, stars) => {
-  await pool.query(
+// Returns true if this is the lesson's first completion. The insert decides
+// it (1 row inserted vs 2 for an update), so two requests for the same
+// lesson at once can't both count as the first one.
+export const saveLessonResult = async (userId, language, lessonId, score, stars, db = pool) => {
+  const [result] = await db.query(
     `INSERT INTO lesson_progress (user_id, language, lesson_id, best_score, stars)
      VALUES (?, ?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
@@ -20,11 +26,12 @@ export const saveLessonResult = async (userId, language, lessonId, score, stars)
        attempts = attempts + 1`,
     [userId, language, lessonId, score, stars],
   );
+  return result.affectedRows === 1;
 };
 
 // ---- Word progress (shared by flashcards and lessons) ----
 
-export const recordWordResults = async (userId, language, results) => {
+export const recordWordResults = async (userId, language, results, db = pool) => {
   if (!results.length) return;
   const values = results.map(({ word, correct }) => [
     userId,
@@ -33,7 +40,7 @@ export const recordWordResults = async (userId, language, results) => {
     correct ? 1 : 0,
     correct ? 0 : 1,
   ]);
-  await pool.query(
+  await db.query(
     `INSERT INTO flashcard_progress (user_id, word, language, correct_count, incorrect_count)
      VALUES ?
      ON DUPLICATE KEY UPDATE
@@ -46,8 +53,15 @@ export const recordWordResults = async (userId, language, results) => {
 
 // ---- Flashcard sessions ----
 
-export const saveFlashcardSession = async (userId, categoryId, language, correct, total) => {
-  await pool.query(
+export const saveFlashcardSession = async (
+  userId,
+  categoryId,
+  language,
+  correct,
+  total,
+  db = pool,
+) => {
+  await db.query(
     "INSERT INTO flashcard_sessions (user_id, category_id, language, correct, total) VALUES (?, ?, ?, ?, ?)",
     [userId, categoryId, language, correct, total],
   );
@@ -55,10 +69,12 @@ export const saveFlashcardSession = async (userId, categoryId, language, correct
 
 // ---- Daily activity (streak + XP) ----
 
-export const addXp = async (userId, xp) => {
-  await pool.query(
-    `INSERT INTO activity_days (user_id, day, xp) VALUES (?, CURDATE(), ?)
+// `day` is the user's local date ("YYYY-MM-DD", req.today), so the streak
+// follows their calendar, not the database server's.
+export const addXp = async (userId, xp, day, db = pool) => {
+  await db.query(
+    `INSERT INTO activity_days (user_id, day, xp) VALUES (?, ?, ?)
      ON DUPLICATE KEY UPDATE xp = xp + VALUES(xp)`,
-    [userId, xp],
+    [userId, day, xp],
   );
 };

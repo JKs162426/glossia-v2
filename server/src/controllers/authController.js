@@ -39,7 +39,18 @@ export const register = async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
-  const userId = await createUser(username, email, hashedPassword);
+  let userId;
+  try {
+    userId = await createUser(username, email, hashedPassword);
+  } catch (err) {
+    // Two sign-ups with the same email or username at once both pass the
+    // checks above; the unique key stops the second one here.
+    if (err.code !== "ER_DUP_ENTRY") throw err;
+    const field = /for key '(?:users\.)?(\w+)'/.exec(err.sqlMessage)?.[1];
+    return res
+      .status(409)
+      .json({ message: field === "username" ? "Username already taken" : "Email already in use" });
+  }
   const user = await findUserById(userId);
 
   setAuthCookie(res, user);
