@@ -140,7 +140,13 @@ npm run lint
     minutes, and the user's data goes with it;
   - authorization: another user's favorites can't be listed or deleted (404),
     locked lessons answer 403;
-  - completing a lesson saves the best score, stars and XP and unlocks the next one.
+  - completing a lesson saves the best score, stars and XP and unlocks the next one;
+  - data integrity: two completions at once pay the first-time XP once; a
+    total that isn't the lesson's (12, or 11 for a checkpoint) → 400; a
+    flashcard session with words outside its deck, or repeated → 400; if a
+    write fails halfway nothing is saved (the test makes one fail on
+    purpose); two sign-ups or favorites at once → 409, not 500; XP lands on
+    the date of the user's time zone.
 - Each integration test cleans up after itself: `tests/integration/setup.js`
   deletes the users it created (emails on `tests.glossia.dev`), and their data
   goes with them through `ON DELETE CASCADE`. `helpers.js` has
@@ -241,8 +247,14 @@ e2e/                   End-to-end tests (Playwright)
 2. Each request goes through rate limit → JWT check (`middleware/auth.js`) →
    validation (`middleware/validators.js`) → controller → model (parameterized SQL).
 3. Lesson content comes from `curriculum.js`; progress is stored in MySQL
-   (`lesson_progress`, `flashcard_progress`, `activity_days`).
-4. The dashboard reads it back in one call: `GET /api/stats/overview`.
+   (`lesson_progress`, `flashcard_progress`, `activity_days`). A finished
+   lesson or flashcard session is saved in one transaction, so it's saved
+   whole or not at all. The server checks the result: a lesson's total must
+   be its number of exercises, and a session's words must belong to its deck.
+4. Days count in the learner's time zone: the client sends it in the
+   `X-Time-Zone` header, XP is stored on that local date, and the streak is
+   counted from it (UTC if the header is missing or invalid).
+5. The dashboard reads it back in one call: `GET /api/stats/overview`.
 
 ### Auth & security
 

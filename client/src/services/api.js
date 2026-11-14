@@ -11,6 +11,8 @@ const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
   timeout: 15000,
+  // XP and the streak count by the learner's own calendar day.
+  headers: { "X-Time-Zone": Intl.DateTimeFormat().resolvedOptions().timeZone },
 });
 
 let onUnauthorized = null;

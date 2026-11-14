@@ -106,6 +106,18 @@ export const buildPath = (progressById) => {
 
 export const nextNodeAfter = (id) => nodes[nodeIndex.get(id) + 1] || null;
 
+// How many exercises the client builds for a node — buildExercises in
+// client/src/lib/exercises.js; keep both in sync. A lesson asks about every
+// word, then a match, 3 reverse and 2 production exercises (12 for 6 words);
+// a checkpoint picks 3 + match + 4 + 3 (11).
+export const exerciseCountFor = (node) => {
+  const n = node.items.length;
+  if (node.type === "checkpoint") {
+    return Math.min(n, 3) + 1 + Math.min(Math.max(n - 3, 0), 4) + Math.min(Math.max(n - 7, 0), 3);
+  }
+  return n + 1 + Math.min(n, 3) + Math.min(n, 2);
+};
+
 export const findCurrentNode = (completedIds) =>
   nodes.find((node) => !completedIds.has(node.id)) || null;
 

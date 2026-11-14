@@ -15,7 +15,7 @@ export const getOverview = async (req, res) => {
   const [counts, activity, recentFavorites, recentSessions, progress] =
     await Promise.all([
       getCounts(userId, language),
-      getActivityDays(userId),
+      getActivityDays(userId, req.today),
       getRecentFavorites(userId),
       getRecentSessions(userId),
       getLessonProgress(userId, language),

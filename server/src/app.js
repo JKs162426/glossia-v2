@@ -15,6 +15,7 @@ import flashcardRoutes from "./routes/flashcardRoutes.js";
 import learnRoutes from "./routes/learnRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
 import { apiLimiter } from "./middleware/rateLimit.js";
+import { localDay } from "./middleware/localDay.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -46,6 +47,7 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 app.use("/api", apiLimiter);
+app.use("/api", localDay);
 app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoritesRoutes);
 app.use("/api/users", userRoutes);

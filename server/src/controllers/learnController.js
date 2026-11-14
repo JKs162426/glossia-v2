@@ -5,6 +5,7 @@ import {
   getNode,
   getNodeCards,
   nextNodeAfter,
+  exerciseCountFor,
 } from "../services/curriculumService.js";
 import { baseLanguageFor } from "../config/languages.js";
 import {
@@ -14,6 +15,7 @@ import {
   addXp,
 } from "../models/progressModel.js";
 import { starsFor, xpFor } from "../services/scoringService.js";
+import { withTransaction } from "../config/db.js";
 
 // Loads the node and refuses access while it's still locked for this user.
 const loadPlayableNode = async (userId, lessonId, language) => {
@@ -63,25 +65,31 @@ export const getLesson = async (req, res) => {
 
 export const completeLesson = async (req, res) => {
   const { language, correct, total } = req.body;
-  const { node, status, error } = await loadPlayableNode(
-    req.user.id,
-    req.params.lessonId,
-    language,
-  );
+  const userId = req.user.id;
+  const { node, error } = await loadPlayableNode(userId, req.params.lessonId, language);
   if (error) return res.status(error[0]).json({ message: error[1] });
+
+  // The score is a share of `total`, so it must be the lesson's real size.
+  if (total !== exerciseCountFor(node)) {
+    return res.status(400).json({ message: "This result doesn't match the lesson" });
+  }
 
   const score = Math.round((correct / total) * 100);
   const stars = starsFor(score);
-  const firstCompletion = status !== "completed";
-  const xp = xpFor({ type: node.type, firstCompletion, score });
 
-  await saveLessonResult(req.user.id, language, node.id, score, stars);
-  await recordWordResults(
-    req.user.id,
-    language,
-    getNodeCards(node, language).map((card) => ({ word: card.term, correct: true })),
-  );
-  await addXp(req.user.id, xp);
+  // All or nothing: progress, words and XP are saved together.
+  const { firstCompletion, xp } = await withTransaction(async (conn) => {
+    const firstCompletion = await saveLessonResult(userId, language, node.id, score, stars, conn);
+    const xp = xpFor({ type: node.type, firstCompletion, score });
+    await recordWordResults(
+      userId,
+      language,
+      getNodeCards(node, language).map((card) => ({ word: card.term, correct: true })),
+      conn,
+    );
+    await addXp(userId, xp, req.today, conn);
+    return { firstCompletion, xp };
+  });
 
   const next = nextNodeAfter(node.id);
   res.json({

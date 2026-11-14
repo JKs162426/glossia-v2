@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildPath,
   computeStatuses,
+  exerciseCountFor,
   findCurrentNode,
   getLevelCards,
   getNode,
@@ -125,5 +126,16 @@ describe("curriculum content", () => {
     const [es] = getLevelCards("A1", "es");
     expect(zh.hint).toBeTruthy();
     expect(es.hint).toBeUndefined();
+  });
+});
+
+describe("exerciseCountFor", () => {
+  // Must match buildExercises in client/src/lib/exercises.js, whose tests
+  // check the same numbers: 12 for a lesson, 11 for a checkpoint.
+  it("is 12 for every lesson and 11 for every checkpoint", () => {
+    for (const id of getNodeOrder()) {
+      const node = getNode(id);
+      expect(exerciseCountFor(node), id).toBe(node.type === "checkpoint" ? 11 : 12);
+    }
   });
 });

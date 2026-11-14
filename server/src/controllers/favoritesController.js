@@ -19,7 +19,15 @@ export const createFavorite = async (req, res) => {
       .json({ message: "Already in your favorites", id: existing.id });
   }
 
-  const id = await addFavorite(req.user.id, word, translation, language);
+  let id;
+  try {
+    id = await addFavorite(req.user.id, word, translation, language);
+  } catch (err) {
+    // Saved twice at once (a double click): the unique key keeps one.
+    if (err.code !== "ER_DUP_ENTRY") throw err;
+    const saved = await findFavorite(req.user.id, word, language);
+    return res.status(409).json({ message: "Already in your favorites", id: saved?.id });
+  }
   res.status(201).json({ id, word, translation, language });
 };
 

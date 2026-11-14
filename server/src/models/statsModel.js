@@ -26,16 +26,15 @@ export const getCounts = async (userId, language) => {
   };
 };
 
-// Days with activity in the last year, newest first, plus "today" from the
-// DB clock so the streak math uses the same timezone as the stored dates.
-export const getActivityDays = async (userId) => {
+// Days with activity in the year up to `today`, the user's local date
+// (req.today), newest first. Days are stored in that same calendar (addXp).
+export const getActivityDays = async (userId, today) => {
   const [rows] = await pool.query(
     `SELECT day, xp FROM activity_days
-     WHERE user_id = ? AND day > CURDATE() - INTERVAL 1 YEAR
+     WHERE user_id = ? AND day > ? - INTERVAL 1 YEAR
      ORDER BY day DESC`,
-    [userId],
+    [userId, today],
   );
-  const [[{ today }]] = await pool.query("SELECT CURDATE() AS today");
   return { rows, today };
 };
 
