@@ -1,28 +1,22 @@
 import pool from "../config/db.js";
 
-const one = async (sql, params) => (await pool.query(sql, params))[0][0];
-
+// One query (and one pool connection) for the four dashboard counters.
 export const getCounts = async (userId, language) => {
-  const [favorites, words, flashcards, xp] = await Promise.all([
-    one("SELECT COUNT(*) AS n FROM favorite_words WHERE user_id = ?", [userId]),
-    one(
-      "SELECT COUNT(*) AS n FROM flashcard_progress WHERE user_id = ? AND language = ? AND correct_count > 0",
-      [userId, language],
-    ),
-    one(
-      "SELECT COALESCE(SUM(total), 0) AS n FROM flashcard_sessions WHERE user_id = ?",
-      [userId],
-    ),
-    one("SELECT COALESCE(SUM(xp), 0) AS n FROM activity_days WHERE user_id = ?", [
-      userId,
-    ]),
-  ]);
+  const [[counts]] = await pool.query(
+    `SELECT
+       (SELECT COUNT(*) FROM favorite_words WHERE user_id = ?) AS favorites,
+       (SELECT COUNT(*) FROM flashcard_progress
+         WHERE user_id = ? AND language = ? AND correct_count > 0) AS wordsLearned,
+       (SELECT COALESCE(SUM(total), 0) FROM flashcard_sessions WHERE user_id = ?) AS flashcardsReviewed,
+       (SELECT COALESCE(SUM(xp), 0) FROM activity_days WHERE user_id = ?) AS totalXp`,
+    [userId, userId, language, userId, userId],
+  );
 
   return {
-    favorites: Number(favorites.n),
-    wordsLearned: Number(words.n),
-    flashcardsReviewed: Number(flashcards.n),
-    totalXp: Number(xp.n),
+    favorites: Number(counts.favorites),
+    wordsLearned: Number(counts.wordsLearned),
+    flashcardsReviewed: Number(counts.flashcardsReviewed),
+    totalXp: Number(counts.totalXp),
   };
 };
 
