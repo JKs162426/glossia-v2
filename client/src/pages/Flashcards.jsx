@@ -253,11 +253,12 @@ function DeckSession({ deck, language }) {
 function Flashcards() {
   const { deckId } = useParams();
   const { targetLanguage } = useLanguage();
-  const path =
-    deckId === "favorites"
-      ? `/favorites?language=${targetLanguage}`
-      : `/categories/${deckId}/deck?language=${targetLanguage}`;
-  const { data, loading, error } = useApi(path);
+  const favorites = deckId === "favorites";
+  const path = favorites
+    ? `/favorites?language=${targetLanguage}`
+    : `/categories/${deckId}/deck?language=${targetLanguage}`;
+  // A category's words never change during a visit; favorites can.
+  const { data, loading, error } = useApi(path, { cache: !favorites });
   const deck = data && toDeck(deckId, data);
 
   return (

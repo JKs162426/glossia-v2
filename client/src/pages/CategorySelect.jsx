@@ -32,7 +32,7 @@ function DeckCard({ to, icon, name, count }) {
 function CategorySelect() {
   const { targetLanguage } = useLanguage();
   const language = getLanguage(targetLanguage);
-  const categories = useApi(`/categories?language=${targetLanguage}`);
+  const categories = useApi(`/categories?language=${targetLanguage}`, { cache: true });
   const favorites = useApi(`/favorites?language=${targetLanguage}`);
 
   return (
