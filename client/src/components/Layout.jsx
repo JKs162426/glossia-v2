@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import Sidebar from "./Sidebar";
@@ -12,14 +13,18 @@ export function ProtectedLayout({ bare = false }) {
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
-  if (bare) return <Outlet />;
+  // Suspense: some pages load on demand (React.lazy in App.jsx).
+  const page = (
+    <Suspense fallback={<Loader fullscreen={bare} />}>
+      <Outlet />
+    </Suspense>
+  );
+  if (bare) return page;
 
   return (
     <div className="app-shell">
       <Sidebar />
-      <main className="main-content">
-        <Outlet />
-      </main>
+      <main className="main-content">{page}</main>
     </div>
   );
 }
