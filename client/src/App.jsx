@@ -1,3 +1,4 @@
+import { lazy, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -9,14 +10,29 @@ import ResetPassword from "./pages/ResetPassword";
 import AuthCallback from "./pages/AuthCallback";
 import Home from "./pages/Home";
 import Learn from "./pages/Learn";
-import Lesson from "./pages/Lesson";
 import CategorySelect from "./pages/CategorySelect";
 import Flashcards from "./pages/Flashcards";
-import Translator from "./pages/Translator";
 import Favorites from "./pages/Favorites";
 import Account from "./pages/Account";
 
+// The two largest pages load in their own files, so the first screen
+// downloads less. The layouts show a loader while one arrives.
+const loadLesson = () => import("./pages/Lesson");
+const loadTranslator = () => import("./pages/Translator");
+const Lesson = lazy(loadLesson);
+const Translator = lazy(loadTranslator);
+
 function App() {
+  // Once the first screen is up, fetch them in the background, so opening a
+  // lesson doesn't wait for one more download.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadLesson();
+      loadTranslator();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <AuthProvider>
       <LanguageProvider>

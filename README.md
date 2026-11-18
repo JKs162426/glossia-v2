@@ -210,7 +210,8 @@ client/                React app (Vite)
   src/components/      Shared UI: Sidebar, Icon (own SVG set), AuthShell…
   src/lib/             Pure logic: exercises, languages, icons, speech,
                        path celebrations, streak memory
-  src/hooks/           useApi (GET a path), useCountUp (animated numbers)
+  src/hooks/           useApi (GET a path, optionally kept for the visit),
+                       useCountUp (animated numbers)
   src/test/setup.js    Test setup (DOM matchers)
 server/
   src/app.js           Builds the Express app (exported, used by tests)
@@ -254,7 +255,12 @@ e2e/                   End-to-end tests (Playwright)
 4. Days count in the learner's time zone: the client sends it in the
    `X-Time-Zone` header, XP is stored on that local date, and the streak is
    counted from it (UTC if the header is missing or invalid).
-5. The dashboard reads it back in one call: `GET /api/stats/overview`.
+5. The dashboard reads it back in one call: `GET /api/stats/overview`, which
+   runs 6 queries at once, the session check included (a test keeps it there:
+   each one holds one of the pool's 10 connections).
+6. Lesson and Translator load in their own files (`React.lazy` in `App.jsx`),
+   fetched in the background soon after the app starts. The decks and their
+   words are kept for the rest of the visit (`useApi(path, { cache: true })`).
 
 ### Auth & security
 
