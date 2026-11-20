@@ -46,8 +46,8 @@
   --focus-ring: 0 0 0 3px rgba(0, 212, 255, 0.45);
 
   /* Type */
-  --font-body: "Inter", system-ui, -apple-system, sans-serif;
-  --font-display: "Space Grotesk", var(--font-body);
+  --font-body: "Inter Variable", system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk Variable", var(--font-body);
 
   /* Layout */
   --sidebar-width: 240px;
