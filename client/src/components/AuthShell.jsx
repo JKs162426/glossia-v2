@@ -7,13 +7,14 @@ export function AuthShell({ subtitle, children }) {
   return (
     <div className="auth-container">
       <div className="auth-glow" aria-hidden="true" />
-      <div className="auth-box">
+      {/* The main landmark lets screen reader users jump straight to the form. */}
+      <main className="auth-box">
         <div className="auth-logo">
           <h1 className="gradient-text">Glossia</h1>
           <p>{subtitle}</p>
         </div>
         {children}
-      </div>
+      </main>
     </div>
   );
 }

@@ -27,9 +27,11 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        // The client loads Google Fonts and calls the MyMemory translation API.
-        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        "font-src": ["'self'", "https://fonts.gstatic.com"],
+        // Styles and fonts only from our own files: no inline <style> or
+        // style="" (React's style prop sets CSSOM properties, which CSP
+        // allows). The only outside call is the MyMemory translation API.
+        "style-src": ["'self'"],
+        "font-src": ["'self'"],
         "connect-src": ["'self'", "https://api.mymemory.translated.net"],
       },
     },

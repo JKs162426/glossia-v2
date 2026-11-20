@@ -22,4 +22,19 @@ describe("API smoke test", () => {
     expect(res.headers["content-security-policy"]).toContain("default-src 'self'");
     expect(res.headers["strict-transport-security"]).toMatch(/max-age=\d+/);
   });
+
+  it("allows styles, fonts and scripts only from the site itself", async () => {
+    const res = await request(app).get("/api/health");
+    const policy = Object.fromEntries(
+      res.headers["content-security-policy"].split(";").map((d) => {
+        const [name, ...values] = d.trim().split(/\s+/);
+        return [name, values];
+      }),
+    );
+    expect(policy["style-src"]).toEqual(["'self'"]);
+    expect(policy["font-src"]).toEqual(["'self'"]);
+    expect(policy["script-src"]).toEqual(["'self'"]);
+    expect(policy["connect-src"]).toEqual(["'self'", "https://api.mymemory.translated.net"]);
+    expect(res.headers["content-security-policy"]).not.toContain("unsafe-inline");
+  });
 });
