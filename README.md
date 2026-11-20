@@ -27,12 +27,12 @@ the first load can take up to a minute while the server wakes up.
 
 | Layer | Tech |
 | --- | --- |
-| Frontend (`client/`) | React 19, React Router, Vite, Axios |
+| Frontend (`client/`) | React 19, React Router, Vite, Axios, Fontsource (self-hosted Inter and Space Grotesk) |
 | Backend (`server/`) | Node.js, Express 5, express-validator |
 | Database | MySQL (`mysql2`), SQL migrations |
 | Auth | JWT in an httpOnly cookie, bcrypt, Passport (Google OAuth 2.0) |
 | Security | helmet, express-rate-limit |
-| Tests | Vitest, Supertest, Testing Library (jsdom), Playwright (end-to-end) |
+| Tests | Vitest, Supertest, Testing Library (jsdom), Playwright (end-to-end), Lighthouse CI |
 | Deploy | Render |
 
 ## Requirements
@@ -191,12 +191,17 @@ Every push and pull request runs three jobs on GitHub Actions
 | --- | --- |
 | Client | lint, unit tests, `npm audit` |
 | Server | lint, unit and integration tests against a MySQL 8.4 service, `npm audit` |
-| End-to-end | lint, the Playwright tests in Google Chrome, on their own MySQL service |
+| End-to-end | lint, the Playwright tests in Google Chrome, on their own MySQL service, then Lighthouse |
 
 - `npm audit` fails the job on high or critical issues in the packages that
   ship (`--omit=dev`).
 - When an end-to-end test fails, the run keeps its trace for 7 days
   (`playwright-traces`): open it with `npx playwright show-trace trace.zip`.
+- Lighthouse CI (`e2e/lighthouserc.json`) audits the login and register
+  pages 3 times each. Accessibility below 1, best practices below 0.95 or SEO
+  below 1 fail the job; performance only warns below 0.8, since the CI server
+  doesn't compress files (Render does). The reports are kept for 14 days
+  (`lighthouse-report`).
 - `main` is protected: a commit can only land there once all three jobs pass.
 - Dependabot (`.github/dependabot.yml`) opens pull requests every Monday for
   the npm packages and the GitHub Actions, only for versions released at
@@ -277,6 +282,12 @@ e2e/                   End-to-end tests (Playwright)
   SHA-256. The link works once, for 30 minutes, and asking again cancels it.
   Using it bumps `token_version`, so every session ends. Limits: 5 requests
   per IP per 15 min, 3 per address per hour, 10 failed resets per 15 min.
+- Content-Security-Policy (helmet, `server/src/app.js`): scripts, styles and
+  fonts only from the site itself, no `'unsafe-inline'`; the only outside call
+  allowed is the MyMemory API. The fonts ship with the app (Fontsource), so
+  no request goes to Google. React's `style` prop still works: it sets CSSOM
+  properties, which CSP doesn't block. Every e2e test fails on a console
+  error, so anything the policy blocks shows up there.
 - Rate limits on login/register and on the whole API; security headers via helmet.
   Limits are counted per client IP, so in production `TRUST_PROXY_HOPS` must
   match the number of proxies in front of the app — **3 on Render**. To check
