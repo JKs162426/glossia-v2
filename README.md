@@ -76,7 +76,7 @@ register `http://localhost:3000/api/auth/google/callback` as a redirect URI.
 | `JWT_SECRET` | Signs session tokens; required, 32+ chars in production |
 | `JWT_EXPIRES_IN` | Session length (default `7d`) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL` | Optional Google sign-in |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP provider for emails (Brevo: `smtp-relay.brevo.com`, port `587`, the SMTP login and an SMTP key). Required in production |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP provider for emails (Brevo: `smtp-relay.brevo.com`, the SMTP login and an SMTP key). Required in production. On Render use port `2525`: the free plan blocks the usual SMTP ports (25, 465, 587) |
 | `MAIL_FROM` | Sender, e.g. `Glossia <you@example.com>`; must be a sender verified in Brevo. Required in production |
 
 Without `SMTP_HOST` (development, tests) emails aren't sent: the server prints

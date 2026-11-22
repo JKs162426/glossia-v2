@@ -91,7 +91,7 @@ const config = {
       ? {
           host: process.env.SMTP_HOST,
           port: smtpPort,
-          // 465 is TLS from the start; 587 upgrades with STARTTLS.
+          // 465 is TLS from the start; 587 and 2525 upgrade with STARTTLS.
           secure: smtpPort === 465,
           requireTLS: smtpPort !== 465,
           auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
