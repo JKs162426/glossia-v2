@@ -10,6 +10,11 @@ describe("dayIn", () => {
     expect(dayIn("Asia/Tokyo", at)).toBe("2026-11-14");
   });
 
+  it("treats zone names as case-insensitive", () => {
+    expect(dayIn("america/mexico_city", at)).toBe("2026-11-13");
+    expect(dayIn("AMERICA/MEXICO_CITY", at)).toBe("2026-11-13");
+  });
+
   it("is null for a zone that doesn't exist", () => {
     expect(dayIn("Not/A_Zone", at)).toBeNull();
     expect(dayIn("", at)).toBeNull();
