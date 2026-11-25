@@ -48,6 +48,12 @@ app.use(cookieParser());
 
 app.use(passport.initialize());
 
+// Health checks (Render's, and the uptime monitor's) are answered before the
+// rate limiter and localDay, so the pings every few seconds do no extra work.
+app.get("/api/health", (req, res) => {
+  res.json({ message: "Glossia API running" });
+});
+
 app.use("/api", apiLimiter);
 app.use("/api", localDay);
 app.use("/api/auth", authRoutes);
@@ -58,9 +64,6 @@ app.use("/api/flashcards", flashcardRoutes);
 app.use("/api/learn", learnRoutes);
 app.use("/api/stats", statsRoutes);
 
-app.get("/api/health", (req, res) => {
-  res.json({ message: "Glossia API running" });
-});
 app.use("/api", notFound);
 
 // In production the API also serves the built React app, so the site and the
