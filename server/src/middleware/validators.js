@@ -117,24 +117,36 @@ export const flashcardSessionValidators = [
   body("results.*.correct").isBoolean().toBoolean(),
 ];
 
-export const lessonParamValidators = [
+const lessonId = () =>
   param("lessonId")
     .matches(/^a[12]-u\d+-(l\d+|test)$/)
-    .withMessage("Invalid lesson id"),
-  languageIn(query("language")),
+    .withMessage("Invalid lesson id");
+
+export const lessonParamValidators = [lessonId(), languageIn(query("language"))];
+
+export const lessonAttemptValidators = [
+  lessonId(),
+  languageIn(body("language")),
+  body("canSpeak").optional().isBoolean({ strict: true }).withMessage("canSpeak must be true or false"),
 ];
 
+// An answer is what the learner picked or typed, or, for a match, the list
+// of tries: [term on the left, term of the meaning on the right].
+const isText = (value) => typeof value === "string" && value.length <= 255;
+const isAnswer = (value) =>
+  isText(value) ||
+  (Array.isArray(value) &&
+    value.length <= 40 &&
+    value.every((pair) => Array.isArray(pair) && pair.length === 2 && pair.every(isText)));
+
 export const lessonCompleteValidators = [
-  param("lessonId")
-    .matches(/^a[12]-u\d+-(l\d+|test)$/)
-    .withMessage("Invalid lesson id"),
+  lessonId(),
   languageIn(body("language")),
-  body("correct").isInt({ min: 0, max: 100 }).toInt(),
-  body("total").isInt({ min: 1, max: 100 }).toInt(),
-  body().custom(({ correct, total }) => {
-    if (Number(correct) > Number(total)) {
-      throw new Error("Correct answers can't exceed the total");
-    }
-    return true;
-  }),
+  body("attemptId").isInt({ min: 1 }).withMessage("Invalid attempt").toInt(),
+  body("answers")
+    .isArray({ min: 1, max: 20 })
+    .withMessage("Answers must be a list")
+    .bail()
+    .custom((answers) => answers.every(isAnswer))
+    .withMessage("Invalid answer"),
 ];

@@ -1,8 +1,6 @@
-import { shuffle } from "./utils";
-import { canSpeak } from "./speech";
-
-// Languages whose script is easy to type on any keyboard.
-const TYPEABLE = new Set(["en", "es", "fr", "de", "it", "pt"]);
+// The server builds the exercises and grades the answers
+// (server/src/services/exerciseService.js). This copy of its typing check
+// gives the learner instant feedback; keep both in sync.
 
 const ARTICLES = {
   es: ["el", "la", "los", "las", "un", "una"],
@@ -48,79 +46,4 @@ export function checkTyped(input, expected, language) {
     return { correct: true, note: "Watch the accents!" };
   }
   return { correct: false, note: null };
-}
-
-const pickOptions = (card, field, pool) => {
-  const seen = new Set([card[field]]);
-  const wrong = [];
-  for (const other of shuffle(pool)) {
-    if (!seen.has(other[field])) {
-      seen.add(other[field]);
-      wrong.push(other[field]);
-    }
-    if (wrong.length === 3) break;
-  }
-  return shuffle([card[field], ...wrong]);
-};
-
-const choice = (card, pool) => ({
-  type: "choice",
-  card,
-  options: pickOptions(card, "meaning", pool),
-  answer: card.meaning,
-});
-
-const reverse = (card, pool) => ({
-  type: "reverse",
-  card,
-  options: pickOptions(card, "term", pool),
-  answer: card.term,
-});
-
-const listen = (card, pool) => ({
-  type: "listen",
-  card,
-  options: pickOptions(card, "term", pool),
-  answer: card.term,
-});
-
-const typing = (card) => ({ type: "type", card, answer: card.term });
-
-const match = (cards) => ({ type: "match", pairs: cards });
-
-// Builds the exercise list for a lesson or checkpoint. Every exercise gets a
-// stable id so wrong answers can be re-queued at the end.
-export function buildExercises({ type, cards, distractors, language }) {
-  const pool = [...cards, ...distractors];
-  const production = (card) =>
-    TYPEABLE.has(language)
-      ? typing(card)
-      : canSpeak
-        ? listen(card, pool)
-        : reverse(card, pool);
-
-  let list;
-  if (type === "checkpoint") {
-    const picked = shuffle(cards);
-    list = [
-      ...picked.slice(0, 3).map((c) => choice(c, pool)),
-      match(shuffle(cards).slice(0, 5)),
-      ...picked.slice(3, 7).map((c) => reverse(c, pool)),
-      ...picked.slice(7, 10).map(production),
-    ];
-  } else {
-    // Recognition first (see the word, pick its meaning), then recall.
-    const intro = cards.map((c) => choice(c, pool));
-    list = [
-      ...intro.slice(0, 3),
-      match(shuffle(cards).slice(0, 5)),
-      ...intro.slice(3),
-      ...shuffle([
-        ...shuffle(cards).slice(0, 3).map((c) => reverse(c, pool)),
-        ...shuffle(cards).slice(0, 2).map(production),
-      ]),
-    ];
-  }
-
-  return list.map((exercise, i) => ({ ...exercise, id: i }));
 }

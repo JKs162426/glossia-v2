@@ -34,7 +34,8 @@ test("practices a deck with the keyboard, then only the missed cards", async ({ 
     for (const word of missed) {
       await expect(page.locator(".missed").getByText(word, { exact: true })).toBeVisible();
     }
-    await expect(page.getByText(`+${total - 2} XP`)).toBeVisible();
+    // 1 XP per card reviewed, the missed ones too (the learner grades them).
+    await expect(page.getByText(`+${total} XP`)).toBeVisible();
   });
 
   await test.step('"Practice missed" replays only those two cards', async () => {

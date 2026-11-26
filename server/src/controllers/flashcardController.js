@@ -15,8 +15,8 @@ export const createSession = async (req, res) => {
     return res.status(404).json({ message: "Category not found" });
   }
 
-  // Each answered card must be in the deck, once: XP is one per right answer,
-  // so made-up or repeated words would inflate it.
+  // Each answered card must be in the deck, once: XP is one per card, so
+  // made-up or repeated words would inflate it.
   const deck = categoryId
     ? await getCategoryTerms(categoryId, language)
     : await getFavoriteTerms(userId, language);
@@ -25,8 +25,11 @@ export const createSession = async (req, res) => {
     return res.status(400).json({ message: "These cards aren't in this deck" });
   }
 
+  // The learner grades the cards themselves ("Got it" / "Missed"), so the
+  // server can't check `correct`. XP is per card reviewed, known or not, so
+  // marking everything as known isn't worth more.
   const correct = results.filter((r) => r.correct).length;
-  const xp = correct;
+  const xp = results.length;
 
   await withTransaction(async (conn) => {
     await saveFlashcardSession(userId, categoryId, language, correct, results.length, conn);

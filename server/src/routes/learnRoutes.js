@@ -2,12 +2,14 @@ import express from "express";
 import {
   getPath,
   getLesson,
+  startAttempt,
   completeLesson,
 } from "../controllers/learnController.js";
 import authMiddleware from "../middleware/auth.js";
 import {
   languageQueryValidator,
   lessonParamValidators,
+  lessonAttemptValidators,
   lessonCompleteValidators,
 } from "../middleware/validators.js";
 import { validate } from "../middleware/validate.js";
@@ -18,6 +20,12 @@ router.use(authMiddleware);
 
 router.get("/path", languageQueryValidator, validate, getPath);
 router.get("/lessons/:lessonId", lessonParamValidators, validate, getLesson);
+router.post(
+  "/lessons/:lessonId/attempts",
+  lessonAttemptValidators,
+  validate,
+  startAttempt,
+);
 router.post(
   "/lessons/:lessonId/complete",
   lessonCompleteValidators,
