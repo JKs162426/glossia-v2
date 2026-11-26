@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../context/language-context";
-import { useApi } from "../hooks/useApi";
 import { useCountUp } from "../hooks/useCountUp";
 import api from "../services/api";
 import { getLanguage } from "../lib/languages";
-import { buildExercises, checkTyped } from "../lib/exercises";
+import { checkTyped } from "../lib/exercises";
 import { canSpeak, speak } from "../lib/speech";
 import { errorMessage, shuffle } from "../lib/utils";
 import Loader from "../components/Loader";
@@ -34,14 +33,17 @@ function MatchExercise({ pairs, language, onDone }) {
   const [matched, setMatched] = useState([]);
   const [wrong, setWrong] = useState(null);
   const mistakes = useRef(0);
+  // Every try, [left term, term of the meaning picked]: the server grades them.
+  const tries = useRef([]);
 
   const tryMatch = (leftTerm, rightTerm) => {
     setSelected(null);
+    tries.current.push([leftTerm, rightTerm]);
     if (leftTerm === rightTerm) {
       const next = [...matched, leftTerm];
       setMatched(next);
       speak(leftTerm, language);
-      if (next.length === pairs.length) onDone(mistakes.current === 0, mistakes.current);
+      if (next.length === pairs.length) onDone(mistakes.current, tries.current);
     } else {
       mistakes.current += 1;
       setWrong([leftTerm, rightTerm]);
@@ -190,7 +192,8 @@ function LessonRunner({ lesson }) {
   const navigate = useNavigate();
   const language = getLanguage(lesson.language);
 
-  const [exercises] = useState(() => buildExercises(lesson));
+  // Built by the server, which grades the answers sent at the end.
+  const { exercises } = lesson;
   const [queue, setQueue] = useState(exercises);
   const [position, setPosition] = useState(0);
   const [mistakes, setMistakes] = useState(() => new Set());
@@ -204,6 +207,9 @@ function LessonRunner({ lesson }) {
   const [saveError, setSaveError] = useState("");
   const [result, setResult] = useState(null);
   const inputRef = useRef(null);
+  // The first answer to each exercise, by id: what was picked or typed, or
+  // the match tries. Retries at the end don't change it.
+  const answers = useRef([]);
 
   const exercise = queue[position];
   const total = exercises.length;
@@ -215,25 +221,26 @@ function LessonRunner({ lesson }) {
     if (exercise?.type === "type") inputRef.current?.focus();
   }, [exercise, position, lesson.language]);
 
-  const saveResult = useCallback(
-    async (correctCount) => {
-      setSaving(true);
-      setSaveError("");
-      try {
-        const res = await api.post(`/learn/lessons/${lesson.id}/complete`, {
-          language: lesson.language,
-          correct: correctCount,
-          total,
-        });
-        setResult(res.data);
-      } catch (err) {
-        setSaveError(errorMessage(err, "Couldn't save your progress."));
-      } finally {
-        setSaving(false);
-      }
-    },
-    [lesson.id, lesson.language, total],
-  );
+  const saveResult = useCallback(async () => {
+    setSaving(true);
+    setSaveError("");
+    try {
+      const res = await api.post(`/learn/lessons/${lesson.id}/complete`, {
+        language: lesson.language,
+        attemptId: lesson.attemptId,
+        answers: answers.current,
+      });
+      setResult(res.data);
+    } catch (err) {
+      setSaveError(errorMessage(err, "Couldn't save your progress."));
+    } finally {
+      setSaving(false);
+    }
+  }, [lesson.id, lesson.language, lesson.attemptId]);
+
+  const keepAnswer = (answer) => {
+    if (answers.current[exercise.id] === undefined) answers.current[exercise.id] = answer;
+  };
 
   const registerAnswer = (correct, note = null) => {
     const nextCombo = correct ? combo + 1 : 0;
@@ -252,14 +259,18 @@ function LessonRunner({ lesson }) {
     if (feedback || !exercise) return;
     if (exercise.type === "type") {
       if (!typed.trim()) return;
+      keepAnswer(typed);
       const { correct, note } = checkTyped(typed, exercise.answer, lesson.language);
       registerAnswer(correct, note);
     } else if (selected !== null) {
+      keepAnswer(selected);
       registerAnswer(selected === exercise.answer);
     }
   };
 
-  const handleMatchDone = (perfect, count) => {
+  const handleMatchDone = (count, tries) => {
+    keepAnswer(tries);
+    const perfect = count === 0;
     if (!perfect) setMistakes((prev) => new Set(prev).add(exercise.id));
     setSolved((n) => n + 1);
     const nextCombo = perfect ? combo + 1 : 0;
@@ -279,7 +290,7 @@ function LessonRunner({ lesson }) {
       setFeedback(null);
     } else {
       setFinished(true);
-      saveResult(total - mistakes.size);
+      saveResult();
     }
   };
 
@@ -315,8 +326,8 @@ function LessonRunner({ lesson }) {
           result={result}
           saving={saving}
           saveError={saveError}
-          onRetrySave={() => saveResult(total - mistakes.size)}
-          accuracy={accuracy}
+          onRetrySave={saveResult}
+          accuracy={result?.score ?? accuracy}
         />
       </div>
     );
@@ -475,12 +486,33 @@ function LessonRunner({ lesson }) {
   );
 }
 
+// Opening a lesson starts an attempt: the server builds the exercises and
+// keeps them to grade the answers. A POST, since each visit creates one.
+function useLessonAttempt(lessonId, language) {
+  const key = `${lessonId}-${language}`;
+  const [state, setState] = useState({ key: null, data: null, error: null });
+
+  useEffect(() => {
+    let cancelled = false;
+    api.post(`/learn/lessons/${lessonId}/attempts`, { language, canSpeak }).then(
+      (res) => !cancelled && setState({ key, data: res.data, error: null }),
+      (err) =>
+        !cancelled &&
+        setState({ key, data: null, error: errorMessage(err, "Couldn't load this lesson") }),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [key, lessonId, language]);
+
+  const loading = state.key !== key;
+  return { data: loading ? null : state.data, error: loading ? null : state.error, loading };
+}
+
 function Lesson() {
   const { lessonId } = useParams();
   const { targetLanguage } = useLanguage();
-  const { data, loading, error } = useApi(
-    `/learn/lessons/${lessonId}?language=${targetLanguage}`,
-  );
+  const { data, loading, error } = useLessonAttempt(lessonId, targetLanguage);
 
   if (loading) return <Loader label="Preparing your lesson…" fullscreen />;
   if (error) {
@@ -498,7 +530,7 @@ function Lesson() {
       </div>
     );
   }
-  return <LessonRunner key={`${data.id}-${data.language}`} lesson={data} />;
+  return <LessonRunner key={data.attemptId} lesson={data} />;
 }
 
 export default Lesson;

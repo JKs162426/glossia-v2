@@ -5,7 +5,6 @@ import {
   getNode,
   getNodeCards,
   nextNodeAfter,
-  exerciseCountFor,
 } from "../services/curriculumService.js";
 import { baseLanguageFor } from "../config/languages.js";
 import {
@@ -15,6 +14,8 @@ import {
   addXp,
 } from "../models/progressModel.js";
 import { starsFor, xpFor } from "../services/scoringService.js";
+import { buildExercises, gradeAnswers } from "../services/exerciseService.js";
+import { createAttempt, lockAttempt, finishAttempt } from "../models/lessonAttemptModel.js";
 import { withTransaction } from "../config/db.js";
 
 // Loads the node and refuses access while it's still locked for this user.
@@ -40,6 +41,19 @@ export const getPath = async (req, res) => {
   });
 };
 
+const lessonInfo = (node, language) => ({
+  id: node.id,
+  type: node.type,
+  title: node.title,
+  level: node.level,
+  unitTitle: node.unitTitle,
+  unitIcon: node.unitIcon,
+  language,
+  baseLanguage: baseLanguageFor(language),
+});
+
+// The lesson and its words. The app plays lessons through startAttempt; this
+// is the content on its own.
 export const getLesson = async (req, res) => {
   const { language } = req.query;
   const { node, error } = await loadPlayableNode(
@@ -50,35 +64,54 @@ export const getLesson = async (req, res) => {
   if (error) return res.status(error[0]).json({ message: error[1] });
 
   res.json({
-    id: node.id,
-    type: node.type,
-    title: node.title,
-    level: node.level,
-    unitTitle: node.unitTitle,
-    unitIcon: node.unitIcon,
-    language,
-    baseLanguage: baseLanguageFor(language),
+    ...lessonInfo(node, language),
     cards: getNodeCards(node, language),
     distractors: getLevelCards(node.level, language),
   });
 };
 
-export const completeLesson = async (req, res) => {
-  const { language, correct, total } = req.body;
+// Opens a lesson: builds its exercises and keeps them, answers included, to
+// grade what comes back (completeLesson).
+export const startAttempt = async (req, res) => {
+  const { language, canSpeak = false } = req.body;
   const userId = req.user.id;
   const { node, error } = await loadPlayableNode(userId, req.params.lessonId, language);
   if (error) return res.status(error[0]).json({ message: error[1] });
 
-  // The score is a share of `total`, so it must be the lesson's real size.
-  if (total !== exerciseCountFor(node)) {
-    return res.status(400).json({ message: "This result doesn't match the lesson" });
-  }
+  const exercises = buildExercises({
+    type: node.type,
+    cards: getNodeCards(node, language),
+    distractors: getLevelCards(node.level, language),
+    language,
+    canSpeak,
+  });
+  const attemptId = await createAttempt(userId, language, node.id, exercises);
+  res.status(201).json({ ...lessonInfo(node, language), attemptId, exercises });
+};
 
-  const score = Math.round((correct / total) * 100);
-  const stars = starsFor(score);
+const ATTEMPT_GONE = "This lesson has expired. Start it again to save your progress.";
 
-  // All or nothing: progress, words and XP are saved together.
-  const { firstCompletion, xp } = await withTransaction(async (conn) => {
+// Finishes an attempt: grades the learner's first answer to each exercise
+// against the exercises the server built, then saves the score and the XP.
+export const completeLesson = async (req, res) => {
+  const { language, attemptId, answers } = req.body;
+  const userId = req.user.id;
+  const { node, error } = await loadPlayableNode(userId, req.params.lessonId, language);
+  if (error) return res.status(error[0]).json({ message: error[1] });
+
+  // All or nothing: the attempt, progress, words and XP are saved together.
+  const outcome = await withTransaction(async (conn) => {
+    const attempt = await lockAttempt(conn, { id: attemptId, userId, lessonId: node.id, language });
+    if (!attempt || (attempt.expired && !attempt.completed)) return { status: 404, body: { message: ATTEMPT_GONE } };
+    // Already saved (a retry after a lost response): same answer, no new XP.
+    if (attempt.completed) return { status: 200, body: attempt.result };
+    if (answers.length !== attempt.exercises.length) {
+      return { status: 400, body: { message: "This result doesn't match the lesson" } };
+    }
+
+    const right = gradeAnswers(attempt.exercises, answers, language).filter(Boolean).length;
+    const score = Math.round((right / answers.length) * 100);
+    const stars = starsFor(score);
     const firstCompletion = await saveLessonResult(userId, language, node.id, score, stars, conn);
     const xp = xpFor({ type: node.type, firstCompletion, score });
     await recordWordResults(
@@ -88,16 +121,19 @@ export const completeLesson = async (req, res) => {
       conn,
     );
     await addXp(userId, xp, req.today, conn);
-    return { firstCompletion, xp };
+
+    const next = nextNodeAfter(node.id);
+    const result = {
+      score,
+      stars,
+      xp,
+      firstCompletion,
+      levelCompleted: firstCompletion && (!next || next.level !== node.level),
+      nextLessonId: next?.id || null,
+    };
+    await finishAttempt(conn, attemptId, result);
+    return { status: 200, body: result };
   });
 
-  const next = nextNodeAfter(node.id);
-  res.json({
-    score,
-    stars,
-    xp,
-    firstCompletion,
-    levelCompleted: firstCompletion && (!next || next.level !== node.level),
-    nextLessonId: next?.id || null,
-  });
+  res.status(outcome.status).json(outcome.body);
 };

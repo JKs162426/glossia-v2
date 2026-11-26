@@ -5,12 +5,7 @@ import pool from "../../src/config/db.js";
 import { getNodeOrder } from "../../src/services/curriculumService.js";
 import { dayIn } from "../../src/middleware/localDay.js";
 import { createTestUser, uniqueUser } from "./helpers.js";
-
-const complete = (user, id, body = {}, zone) => {
-  const req = request(app).post(`/api/learn/lessons/${id}/complete`).set("Cookie", user.cookie);
-  if (zone) req.set("X-Time-Zone", zone);
-  return req.send({ language: "es", correct: 12, total: 12, ...body });
-};
+import { answersFor, finishLesson, playLesson, startLesson } from "./lessonHelpers.js";
 
 const saveSession = (user, body) =>
   request(app)
@@ -51,10 +46,16 @@ const failOn = (pattern) => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("completing a lesson", () => {
-  it("two requests at once give the first-completion XP only once", async () => {
+  it("two lessons finished at once give the first-completion XP only once", async () => {
     const user = await createTestUser();
+    const [a, b] = await Promise.all([startLesson(user, "a1-u1-l1"), startLesson(user, "a1-u1-l1")]);
+    const finish = (attempt) =>
+      finishLesson(user, "a1-u1-l1", {
+        attemptId: attempt.body.attemptId,
+        answers: answersFor(attempt.body.exercises),
+      });
 
-    const results = await Promise.all([complete(user, "a1-u1-l1"), complete(user, "a1-u1-l1")]);
+    const results = await Promise.all([finish(a), finish(b)]);
 
     expect(results.map((r) => r.status)).toEqual([200, 200]);
     expect(results.filter((r) => r.body.firstCompletion)).toHaveLength(1);
@@ -67,15 +68,19 @@ describe("completing a lesson", () => {
     expect(progress.attempts).toBe(2);
   });
 
-  it("refuses a total that isn't the lesson's number of exercises, and saves nothing", async () => {
+  it("one attempt sent twice at once is saved once", async () => {
     const user = await createTestUser();
+    const attempt = await startLesson(user, "a1-u1-l1");
+    const body = { attemptId: attempt.body.attemptId, answers: answersFor(attempt.body.exercises) };
 
-    const res = await complete(user, "a1-u1-l1", { correct: 20, total: 20 });
+    const results = await Promise.all([
+      finishLesson(user, "a1-u1-l1", body),
+      finishLesson(user, "a1-u1-l1", body),
+    ]);
 
-    expect(res.status).toBe(400);
-    expect(res.body.message).toBe("This result doesn't match the lesson");
-    expect(await rows("SELECT 1 FROM lesson_progress WHERE user_id = ?", [user.id])).toHaveLength(0);
-    expect(await totalXp(user)).toBe(0);
+    expect(results.map((r) => r.status)).toEqual([200, 200]);
+    expect(results[0].body).toEqual(results[1].body);
+    expect(await totalXp(user)).toBe(15);
   });
 
   it("a checkpoint has 11 exercises", async () => {
@@ -87,22 +92,25 @@ describe("completing a lesson", () => {
       [unitLessons.map((id) => [user.id, "es", id, 100, 3])],
     );
 
-    expect((await complete(user, "a1-u1-test", { correct: 12, total: 12 })).status).toBe(400);
-    expect((await complete(user, "a1-u1-test", { correct: 11, total: 11 })).status).toBe(200);
+    const attempt = await startLesson(user, "a1-u1-test");
+    expect(attempt.body.exercises).toHaveLength(11);
+    expect((await playLesson(user, "a1-u1-test")).body).toMatchObject({ score: 100, xp: 25 });
   });
 
   it("saves all or nothing: if the XP can't be written, the progress isn't either", async () => {
     const user = await createTestUser();
+    const attempt = await startLesson(user, "a1-u1-l1");
+    const body = { attemptId: attempt.body.attemptId, answers: answersFor(attempt.body.exercises) };
     failOn(/INSERT INTO activity_days/);
 
-    const res = await complete(user, "a1-u1-l1");
+    const res = await finishLesson(user, "a1-u1-l1", body);
 
     expect(res.status).toBe(500);
     vi.restoreAllMocks();
     expect(await rows("SELECT 1 FROM lesson_progress WHERE user_id = ?", [user.id])).toHaveLength(0);
     expect(await rows("SELECT 1 FROM flashcard_progress WHERE user_id = ?", [user.id])).toHaveLength(0);
-    // And the lesson can still be completed normally afterwards.
-    expect((await complete(user, "a1-u1-l1")).body.firstCompletion).toBe(true);
+    // The attempt wasn't marked as finished either, so sending it again works.
+    expect((await finishLesson(user, "a1-u1-l1", body)).body.firstCompletion).toBe(true);
   });
 });
 
@@ -115,8 +123,8 @@ describe("the user's own calendar day", () => {
     const east = await createTestUser();
     const west = await createTestUser();
 
-    await complete(east, "a1-u1-l1", {}, EAST);
-    await complete(west, "a1-u1-l1", {}, WEST);
+    await playLesson(east, "a1-u1-l1", { zone: EAST });
+    await playLesson(west, "a1-u1-l1", { zone: WEST });
 
     const [eastDay] = await rows("SELECT day FROM activity_days WHERE user_id = ?", [east.id]);
     const [westDay] = await rows("SELECT day FROM activity_days WHERE user_id = ?", [west.id]);
@@ -127,7 +135,7 @@ describe("the user's own calendar day", () => {
 
   it("the dashboard counts the streak and the week from the user's today", async () => {
     const user = await createTestUser();
-    await complete(user, "a1-u1-l1", {}, EAST);
+    await playLesson(user, "a1-u1-l1", { zone: EAST });
 
     const stats = await request(app)
       .get("/api/stats/overview?language=es")
@@ -140,7 +148,7 @@ describe("the user's own calendar day", () => {
 
   it("an invalid or missing zone falls back to UTC", async () => {
     const user = await createTestUser();
-    await complete(user, "a1-u1-l1", {}, "Not/A_Zone");
+    await playLesson(user, "a1-u1-l1", { zone: "Not/A_Zone" });
 
     const [row] = await rows("SELECT day FROM activity_days WHERE user_id = ?", [user.id]);
     expect(row.day).toBe(dayIn("UTC"));
