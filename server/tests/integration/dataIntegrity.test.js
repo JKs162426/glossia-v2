@@ -169,7 +169,9 @@ describe("flashcard sessions", () => {
     });
 
     expect(res.status).toBe(201);
-    expect(res.body).toEqual({ correct: 1, total: 2, xp: 1 });
+    // 1 XP per card reviewed, known or not: the learner grades the cards
+    // themselves, so "Got it" can't be worth more.
+    expect(res.body).toEqual({ correct: 1, total: 2, xp: 2 });
   });
 
   it("refuses made-up or repeated words, and saves nothing", async () => {
