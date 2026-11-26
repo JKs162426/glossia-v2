@@ -242,7 +242,7 @@ e2e/                   End-to-end tests (Playwright)
 | Path order, unlocking, lesson ids | `server/src/services/curriculumService.js` |
 | Stars and XP for a finished lesson | `server/src/services/scoringService.js` |
 | Streak and the 7-day XP chart | `server/src/services/activityService.js` |
-| Exercise generation & answer checking | `client/src/lib/exercises.js` |
+| Exercise generation & grading | `server/src/services/exerciseService.js` (the client keeps a copy of `checkTyped` for instant feedback: keep in sync) |
 | Animations | Shared keyframes and the reduce-motion rule in `client/src/index.css`, icon animations in `components/Icon.css`, the rest in each page's CSS. `lib/path.js` decides what the path celebrates. |
 | Database migrations | `server/db/migrations/*.sql` (`npm run migrate`) |
 | Supported languages | `server/src/config/languages.js` + `client/src/lib/languages.js` (keep in sync) |
@@ -255,8 +255,17 @@ e2e/                   End-to-end tests (Playwright)
 3. Lesson content comes from `curriculum.js`; progress is stored in MySQL
    (`lesson_progress`, `flashcard_progress`, `activity_days`). A finished
    lesson or flashcard session is saved in one transaction, so it's saved
-   whole or not at all. The server checks the result: a lesson's total must
-   be its number of exercises, and a session's words must belong to its deck.
+   whole or not at all.
+   - **Lessons are graded by the server.** Opening one
+     (`POST /api/learn/lessons/:id/attempts`) builds its exercises and keeps
+     them in `lesson_attempts`. The app gives instant feedback, then sends the
+     learner's first answer to each exercise (the option picked, the text
+     typed, the match tries). The server grades them and computes the score,
+     stars and XP. An attempt is finished once, by its own user, within 24 h;
+     sending it again returns the same result without more XP.
+   - **Flashcards are graded by the learner** ("Got it" / "Missed"), so the
+     server can't check them: XP is 1 per card reviewed, known or not, and
+     the cards must belong to the deck.
 4. Days count in the learner's time zone: the client sends it in the
    `X-Time-Zone` header, XP is stored on that local date, and the streak is
    counted from it (UTC if the header is missing or invalid).
