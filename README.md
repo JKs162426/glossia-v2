@@ -263,6 +263,15 @@ e2e/                   End-to-end tests (Playwright)
      typed, the match tries). The server grades them and computes the score,
      stars and XP. An attempt is finished once, by its own user, within 24 h;
      sending it again returns the same result without more XP.
+   - **Known limit, accepted:** the attempt includes each exercise's answer,
+     so the app can give feedback instantly. A script could send those
+     answers back and score 100. Hiding them wouldn't make the answer key
+     secret: every word and its translation are in this public repository
+     (`server/src/data/curriculum.js`) and in `GET /api/learn/lessons/:id`.
+     Checking each answer through the API would also add a round trip
+     before every "Correct!". Cheating only inflates the cheater's own
+     progress, since nothing is shared or ranked between users. Revisit this
+     if a leaderboard or anything competitive is added.
    - **Flashcards are graded by the learner** ("Got it" / "Missed"), so the
      server can't check them: XP is 1 per card reviewed, known or not, and
      the cards must belong to the deck.
