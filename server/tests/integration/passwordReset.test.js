@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import request from "supertest";
+import bcrypt from "bcryptjs";
 import app from "../../src/app.js";
 import pool from "../../src/config/db.js";
 import { outbox } from "../../src/services/mailer.js";
@@ -125,6 +126,24 @@ describe("POST /api/auth/reset-password", () => {
       expect(res.status, String(token)).toBe(400);
       expect(res.body.message).toBe(INVALID_RESET_LINK);
     }
+  });
+
+  // bcrypt is slow on purpose: made-up or spent links must not cost a hash,
+  // or anyone could keep the server busy with them.
+  it("only hashes the new password for a link that can be used", async () => {
+    const user = await createTestUser();
+    const used = await createPasswordReset(user.id);
+    await reset(used);
+    const hash = vi.spyOn(bcrypt, "hash");
+
+    for (const token of ["A".repeat(43), used]) {
+      expect((await reset(token)).status).toBe(400);
+    }
+    expect(hash).not.toHaveBeenCalled();
+
+    expect((await reset(await createPasswordReset(user.id))).status).toBe(200);
+    expect(hash).toHaveBeenCalledTimes(1);
+    hash.mockRestore();
   });
 
   it("asking again cancels the previous link", async () => {

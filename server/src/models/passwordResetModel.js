@@ -20,8 +20,10 @@ export const createPasswordReset = async (userId) => {
 // Sets the new password if the token is real, unused and not expired, and
 // bumps token_version so every open session ends. The row lock makes two
 // requests with the same link race safely: only one of them succeeds.
+// `hashPassword` is called only once the token is known to be valid, so
+// made-up tokens never cost a bcrypt hash.
 // Returns the user's id, or null when the token can't be used.
-export const resetPasswordWithToken = async (token, passwordHash) => {
+export const resetPasswordWithToken = async (token, hashPassword) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
@@ -36,6 +38,7 @@ export const resetPasswordWithToken = async (token, passwordHash) => {
       await conn.rollback();
       return null;
     }
+    const passwordHash = await hashPassword();
     await conn.query(
       "UPDATE users SET password = ?, token_version = token_version + 1 WHERE id = ?",
       [passwordHash, reset.user_id],

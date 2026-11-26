@@ -119,8 +119,9 @@ export const forgotPassword = async (req, res) => {
 // browser that used it included, so it signs in with the new password).
 export const resetPassword = async (req, res) => {
   const { token, password } = req.body;
-  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-  const userId = await resetPasswordWithToken(token, passwordHash);
+  // Hashed only for a valid token: bcrypt is slow on purpose, and made-up
+  // tokens shouldn't be able to keep the server busy.
+  const userId = await resetPasswordWithToken(token, () => bcrypt.hash(password, BCRYPT_ROUNDS));
   if (!userId) return res.status(400).json({ message: INVALID_RESET_LINK });
 
   clearAuthCookie(res);
